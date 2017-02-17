@@ -313,7 +313,7 @@ void handle_syscall(pid_t child,
                                                        O_CREAT |
                                                        O_TRUNC)));
 
-                    // assure that we decoded one or the other or both
+                    // assure that we decoded correctly
                     assert(read_flag || write_flag);
 
                     fprintf(stderr, " ------- flags:%lx, mode:%lx, flags:", flags, mode);
