@@ -280,12 +280,31 @@ void handle_syscall(pid_t child,
                 if (syscall_num == SYS_open)
                 {
                     // decode open arguments
-                    const long flags = get_syscall_arg(child, 1);
-                    const long mode = get_syscall_arg(child, 2);
-                    printf("flags:%d mode:%d\n", flags, mode);
-                    if (mode & O_RDONLY) { printf("O_RDONLY\n"); }
-                    if (mode & O_WRONLY) { printf("O_WRONLY\n"); }
-                    if (mode &   O_RDWR) { printf("O_RDWR\n"); }
+                    const auto flags = get_syscall_arg(child, 1);
+
+                    // mode in case a new file is created
+                    const auto mode = get_syscall_arg(child, 2);
+
+                    fprintf(stderr, "flags:%x mode:%x, flags:", flags, mode);
+
+                    // print flags
+                    if (flags & O_RDONLY) { fprintf(stderr, " O_RDONLY"); }
+                    if (flags & O_WRONLY) { fprintf(stderr, " O_WRONLY"); }
+                    if (flags & O_RDWR) { fprintf(stderr, " O_RDWR"); }
+                    if (flags & O_DIRECTORY) { fprintf(stderr, " O_DIRECTORY"); }
+                    if (flags & O_CREAT) { fprintf(stderr, " O_CREAT"); }
+                    if (flags & O_TRUNC) { fprintf(stderr, " O_TRUNC"); }
+                    if (flags & O_APPEND) { fprintf(stderr, " O_APPEND"); }
+                    if (flags & O_CLOEXEC) { fprintf(stderr, " O_CLOEXEC"); }
+                    if (flags & O_DIRECT) { fprintf(stderr, " O_DIRECT"); }
+                    if (flags & O_DSYNC) { fprintf(stderr, " O_DSYNC"); }
+                    if (flags & O_EXCL) { fprintf(stderr, " O_EXCL"); }
+                    if (flags & O_LARGEFILE) { fprintf(stderr, " O_LARGEFILE"); }
+                    if (flags & O_NOATIME) { fprintf(stderr, " O_NOATIME"); }
+                    if (flags & O_NOCTTY) { fprintf(stderr, " O_NOCTTY"); }
+                    if (flags & O_NOFOLLOW) { fprintf(stderr, " O_NOFOLLOW"); }
+
+                    fprintf(stderr, "\n");
                 }
                 //  file io successful return
             }
