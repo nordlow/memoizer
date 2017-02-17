@@ -270,6 +270,8 @@ void handle_syscall(pid_t child,
     {
         if (retval >= 0)        // on successful return
         {
+            //  file io successful return
+
             if (syscall_num == SYS_open ||
                 syscall_num == SYS_stat ||
                 syscall_num == SYS_lstat ||
@@ -277,6 +279,7 @@ void handle_syscall(pid_t child,
             {
                 const char* path = "";
                 done_syscalls[syscall_num].push_back(std::string(path));
+
                 if (syscall_num == SYS_open)
                 {
                     // decode open arguments
@@ -285,7 +288,17 @@ void handle_syscall(pid_t child,
                     // mode in case a new file is created
                     const auto mode = get_syscall_arg(child, 2);
 
-                    fprintf(stderr, "flags:%x mode:%x, flags:", flags, mode);
+                    // true if this open writes to file
+                    const bool write_flag = ((flags & (O_WRONLY)) ||
+                                             (flags & (O_RDWR |
+                                                       O_CREAT |
+                                                       O_TRUNC)) ||
+                                             (flags & (O_WRONLY |
+                                                       O_CREAT |
+                                                       O_TRUNC)));
+                    const bool read_flag = flags == O_CLOEXEC || flags == 0;
+
+                    fprintf(stderr, "flags:%lx, mode:%lx, flags:", flags, mode);
 
                     // print flags
                     if (flags & O_RDONLY) { fprintf(stderr, " O_RDONLY"); }
@@ -304,16 +317,21 @@ void handle_syscall(pid_t child,
                     if (flags & O_NOCTTY) { fprintf(stderr, " O_NOCTTY"); }
                     if (flags & O_NOFOLLOW) { fprintf(stderr, " O_NOFOLLOW"); }
 
+                    if (read_flag) { fprintf(stderr, " READ"); }
+                    if (write_flag) { fprintf(stderr, " WRITE"); }
+
                     fprintf(stderr, "\n");
                 }
-                //  file io successful return
+
+                print_syscall(child, syscall_num, retval);
+
             }
             if (syscall_num == SYS_execve ||
                 syscall_num == SYS_vfork)
             {
             }
 
-            const bool verbose = true;
+            const bool verbose = false;
             if (verbose)
             {
                 print_syscall(child, syscall_num, retval);
