@@ -312,6 +312,8 @@ void handle_syscall(pid_t child,
                                              (flags & (O_WRONLY |
                                                        O_CREAT |
                                                        O_TRUNC)));
+
+                    // assure that we decode one or the other or both
                     assert(read_flag || write_flag);
 
                     fprintf(stderr, " ------- flags:%lx, mode:%lx, flags:", flags, mode);
