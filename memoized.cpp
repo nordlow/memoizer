@@ -278,8 +278,11 @@ void handle_syscall(pid_t child,
             //  file io successful return
 
             if (syscall_num == SYS_open ||
+                syscall_num == SYS_openat ||
                 syscall_num == SYS_creat ||
                 syscall_num == SYS_stat ||
+                syscall_num == SYS_statfs ||
+                syscall_num == SYS_stat64 ||
                 syscall_num == SYS_lstat ||
                 syscall_num == SYS_access) // file reads
             {
