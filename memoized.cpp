@@ -252,6 +252,7 @@ void print_syscall(pid_t child,
     assert(errno == 0);
     if (retval == -38)          // on call entry
     {
+        // nothing useful to do here for now
     }
     else                        // on call return
     {
@@ -260,7 +261,7 @@ void print_syscall(pid_t child,
             if (num == SYS_open ||
                 num == SYS_stat ||
                 num == SYS_lstat ||
-                num == SYS_access)
+                num == SYS_access) // file reads
             {
                 const char* path = "";
                 done_syscalls[num].push_back(std::string(path));
@@ -271,7 +272,7 @@ void print_syscall(pid_t child,
             {
             }
 
-            const bool verbose = false;
+            const bool verbose = true;
             if (verbose)
             {
                 fprintf(stderr, "%d %s(", child, syscall_name_of_number(num));
