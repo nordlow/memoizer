@@ -296,31 +296,37 @@ void handle_syscall(pid_t child,
                                              (flags & (O_WRONLY |
                                                        O_CREAT |
                                                        O_TRUNC)));
-                    const bool read_flag = flags == O_CLOEXEC || flags == 0;
+                    const bool read_flag = ((flags & (O_CLOEXEC)) ||
+                                            (flags & (O_NOCTTY)) ||
+                                            (flags == 0));
 
                     fprintf(stderr, "flags:%lx, mode:%lx, flags:", flags, mode);
 
-                    // print flags
-                    if (flags & O_RDONLY) { fprintf(stderr, " O_RDONLY"); }
-                    if (flags & O_WRONLY) { fprintf(stderr, " O_WRONLY"); }
-                    if (flags & O_RDWR) { fprintf(stderr, " O_RDWR"); }
-                    if (flags & O_DIRECTORY) { fprintf(stderr, " O_DIRECTORY"); }
-                    if (flags & O_CREAT) { fprintf(stderr, " O_CREAT"); }
-                    if (flags & O_TRUNC) { fprintf(stderr, " O_TRUNC"); }
-                    if (flags & O_APPEND) { fprintf(stderr, " O_APPEND"); }
-                    if (flags & O_CLOEXEC) { fprintf(stderr, " O_CLOEXEC"); }
-                    if (flags & O_DIRECT) { fprintf(stderr, " O_DIRECT"); }
-                    if (flags & O_DSYNC) { fprintf(stderr, " O_DSYNC"); }
-                    if (flags & O_EXCL) { fprintf(stderr, " O_EXCL"); }
-                    if (flags & O_LARGEFILE) { fprintf(stderr, " O_LARGEFILE"); }
-                    if (flags & O_NOATIME) { fprintf(stderr, " O_NOATIME"); }
-                    if (flags & O_NOCTTY) { fprintf(stderr, " O_NOCTTY"); }
-                    if (flags & O_NOFOLLOW) { fprintf(stderr, " O_NOFOLLOW"); }
+                    const bool verbose = true;
+                    if (verbose)
+                    {
+                        // print flags
+                        if (flags & O_RDONLY) { fprintf(stderr, " O_RDONLY"); }
+                        if (flags & O_WRONLY) { fprintf(stderr, " O_WRONLY"); }
+                        if (flags & O_RDWR) { fprintf(stderr, " O_RDWR"); }
+                        if (flags & O_DIRECTORY) { fprintf(stderr, " O_DIRECTORY"); }
+                        if (flags & O_CREAT) { fprintf(stderr, " O_CREAT"); }
+                        if (flags & O_TRUNC) { fprintf(stderr, " O_TRUNC"); }
+                        if (flags & O_APPEND) { fprintf(stderr, " O_APPEND"); }
+                        if (flags & O_CLOEXEC) { fprintf(stderr, " O_CLOEXEC"); }
+                        if (flags & O_DIRECT) { fprintf(stderr, " O_DIRECT"); }
+                        if (flags & O_DSYNC) { fprintf(stderr, " O_DSYNC"); }
+                        if (flags & O_EXCL) { fprintf(stderr, " O_EXCL"); }
+                        if (flags & O_LARGEFILE) { fprintf(stderr, " O_LARGEFILE"); }
+                        if (flags & O_NOATIME) { fprintf(stderr, " O_NOATIME"); }
+                        if (flags & O_NOCTTY) { fprintf(stderr, " O_NOCTTY"); }
+                        if (flags & O_NOFOLLOW) { fprintf(stderr, " O_NOFOLLOW"); }
 
-                    if (read_flag) { fprintf(stderr, " READ"); }
-                    if (write_flag) { fprintf(stderr, " WRITE"); }
+                        if (read_flag) { fprintf(stderr, " READ"); }
+                        if (write_flag) { fprintf(stderr, " WRITE"); }
 
-                    fprintf(stderr, "\n");
+                        fprintf(stderr, "\n");
+                    }
                 }
 
                 print_syscall(child, syscall_num, retval);
