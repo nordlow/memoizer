@@ -243,13 +243,18 @@ void print_syscall_args(pid_t child, int num)
     }
 }
 
+/// Print newline to `file`.
+void endl(FILE* file = stderr)
+{
+    fprintf(file, "\n");
+}
+
 void print_syscall(pid_t child, long syscall_num, long retval)
 {
     fprintf(stderr, "%d %s(", child, syscall_name_of_number(syscall_num));
     print_syscall_args(child, syscall_num);
     fprintf(stderr, ") = ");
     fprintf(stderr, "%ld", retval);
-    fprintf(stderr, "\n");
 }
 
 void handle_syscall(pid_t child,
@@ -300,7 +305,9 @@ void handle_syscall(pid_t child,
                                             (flags & (O_NOCTTY)) ||
                                             (flags == 0));
 
-                    fprintf(stderr, "flags:%lx, mode:%lx, flags:", flags, mode);
+                    print_syscall(child, syscall_num, retval);
+
+                    fprintf(stderr, " ------- flags:%lx, mode:%lx, flags:", flags, mode);
 
                     const bool verbose = true;
                     if (verbose)
@@ -324,12 +331,10 @@ void handle_syscall(pid_t child,
 
                         if (read_flag) { fprintf(stderr, " READ"); }
                         if (write_flag) { fprintf(stderr, " WRITE"); }
-
-                        fprintf(stderr, "\n");
                     }
-                }
 
-                print_syscall(child, syscall_num, retval);
+                    endl();
+                }
 
             }
             if (syscall_num == SYS_execve ||
@@ -341,6 +346,7 @@ void handle_syscall(pid_t child,
             if (verbose)
             {
                 print_syscall(child, syscall_num, retval);
+                endl();
             }
         }
         else                    // on failure return
