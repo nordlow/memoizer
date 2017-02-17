@@ -1,0 +1,5 @@
+#!/bin/bash
+
+make memoized
+
+./memoized g++ main.cpp
