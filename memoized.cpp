@@ -298,11 +298,13 @@ void handle_syscall(pid_t child,
                     // mode in case a new file is created
                     const auto mode = get_syscall_arg(child, 2);
 
-                    // true if this open writes to file
+                    // true if this open only reads from file
                     const bool read_flag = ((flags & (O_RDONLY)) ||
                                             (flags & (O_CLOEXEC)) ||
                                             (flags & (O_NOCTTY)) ||
                                             (flags == 0));
+
+                    // true if this open only writes to file
                     const bool write_flag = ((flags & (O_WRONLY)) ||
                                              (flags & (O_RDWR |
                                                        O_CREAT |
