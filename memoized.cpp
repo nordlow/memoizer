@@ -278,6 +278,7 @@ void handle_syscall(pid_t child,
             //  file io successful return
 
             if (syscall_num == SYS_open ||
+                syscall_num == SYS_creat ||
                 syscall_num == SYS_stat ||
                 syscall_num == SYS_lstat ||
                 syscall_num == SYS_access) // file reads
@@ -285,7 +286,11 @@ void handle_syscall(pid_t child,
                 const char* path = "";
                 done_syscalls[syscall_num].push_back(std::string(path));
 
-                if (syscall_num == SYS_open)
+                print_syscall(child, syscall_num, retval);
+
+                switch (syscall_num)
+                {
+                case SYS_open:
                 {
                     // decode open arguments
                     const auto flags = get_syscall_arg(child, 1);
@@ -294,6 +299,10 @@ void handle_syscall(pid_t child,
                     const auto mode = get_syscall_arg(child, 2);
 
                     // true if this open writes to file
+                    const bool read_flag = ((flags & (O_RDONLY)) ||
+                                            (flags & (O_CLOEXEC)) ||
+                                            (flags & (O_NOCTTY)) ||
+                                            (flags == 0));
                     const bool write_flag = ((flags & (O_WRONLY)) ||
                                              (flags & (O_RDWR |
                                                        O_CREAT |
@@ -301,11 +310,7 @@ void handle_syscall(pid_t child,
                                              (flags & (O_WRONLY |
                                                        O_CREAT |
                                                        O_TRUNC)));
-                    const bool read_flag = ((flags & (O_CLOEXEC)) ||
-                                            (flags & (O_NOCTTY)) ||
-                                            (flags == 0));
-
-                    print_syscall(child, syscall_num, retval);
+                    assert(read_flag || write_flag);
 
                     fprintf(stderr, " ------- flags:%lx, mode:%lx, flags:", flags, mode);
 
@@ -333,9 +338,13 @@ void handle_syscall(pid_t child,
                         if (write_flag) { fprintf(stderr, " WRITE"); }
                     }
 
-                    endl();
+                    break;
+                }
+                default:
+                    break;
                 }
 
+                endl();
             }
             if (syscall_num == SYS_execve ||
                 syscall_num == SYS_vfork)
