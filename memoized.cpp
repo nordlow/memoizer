@@ -282,7 +282,6 @@ void handle_syscall(pid_t child,
                 syscall_num == SYS_creat ||
                 syscall_num == SYS_stat ||
                 syscall_num == SYS_statfs ||
-                syscall_num == SYS_stat64 ||
                 syscall_num == SYS_lstat ||
                 syscall_num == SYS_access) // file reads
             {
