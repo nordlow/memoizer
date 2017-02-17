@@ -3,6 +3,8 @@
 #include <sys/user.h>
 #include <sys/wait.h>
 #include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include <syscall.h>
 
 #include <unistd.h>
@@ -40,6 +42,7 @@ long __get_reg(pid_t child, int off)
     return val;
 }
 
+/// System calls executed.
 typedef std::vector<std::string> DoneSyscalls[MAX_SYSCALL_NUM + 1];
 
 /** Wait for system call in `child`. */
@@ -149,7 +152,7 @@ void print_syscall_args(pid_t child, int num)
         ent = &syscalls[num];
         nargs = ent->nargs;
     }
-    for (i = 0; i < nargs; i++)
+    for (i = 0; i < nargs; i++) // incorrectly always 6
     {
         const long arg = get_syscall_arg(child, i);
         const int type = ent ? ent->args[i] : ARG_PTR;
@@ -274,7 +277,17 @@ void handle_syscall(pid_t child,
             {
                 const char* path = "";
                 done_syscalls[syscall_num].push_back(std::string(path));
-                // on file io successful return
+                if (syscall_num == SYS_open)
+                {
+                    // decode open arguments
+                    const long flags = get_syscall_arg(child, 1);
+                    const long mode = get_syscall_arg(child, 2);
+                    printf("flags:%d mode:%d\n", flags, mode);
+                    if (mode & O_RDONLY) { printf("O_RDONLY\n"); }
+                    if (mode & O_WRONLY) { printf("O_WRONLY\n"); }
+                    if (mode &   O_RDWR) { printf("O_RDWR\n"); }
+                }
+                //  file io successful return
             }
             if (syscall_num == SYS_execve ||
                 syscall_num == SYS_vfork)
