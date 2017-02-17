@@ -240,11 +240,20 @@ void print_syscall_args(pid_t child, int num)
     }
 }
 
-void print_syscall(pid_t child,
+void print_syscall(pid_t child, long syscall_num, long retval)
+{
+    fprintf(stderr, "%d %s(", child, syscall_name_of_number(syscall_num));
+    print_syscall_args(child, syscall_num);
+    fprintf(stderr, ") = ");
+    fprintf(stderr, "%ld", retval);
+    fprintf(stderr, "\n");
+}
+
+void handle_syscall(pid_t child,
                    DoneSyscalls& done_syscalls)
 {
-    long num;                    // syscall number
-    num = get_reg(child, orig_eax);
+    long syscall_num;                    // syscall number
+    syscall_num = get_reg(child, orig_eax);
     assert(errno == 0);
 
     // return value
@@ -258,28 +267,24 @@ void print_syscall(pid_t child,
     {
         if (retval >= 0)        // on successful return
         {
-            if (num == SYS_open ||
-                num == SYS_stat ||
-                num == SYS_lstat ||
-                num == SYS_access) // file reads
+            if (syscall_num == SYS_open ||
+                syscall_num == SYS_stat ||
+                syscall_num == SYS_lstat ||
+                syscall_num == SYS_access) // file reads
             {
                 const char* path = "";
-                done_syscalls[num].push_back(std::string(path));
+                done_syscalls[syscall_num].push_back(std::string(path));
                 // on file io successful return
             }
-            if (num == SYS_execve ||
-                num == SYS_vfork)
+            if (syscall_num == SYS_execve ||
+                syscall_num == SYS_vfork)
             {
             }
 
             const bool verbose = true;
             if (verbose)
             {
-                fprintf(stderr, "%d %s(", child, syscall_name_of_number(num));
-                print_syscall_args(child, num);
-                fprintf(stderr, ") = ");
-                fprintf(stderr, "%ld", retval);
-                fprintf(stderr, "\n");
+                print_syscall(child, syscall_num, retval);
             }
         }
         else                    // on failure return
@@ -357,7 +362,7 @@ int ptrace_of_top_child(pid_t top_child)
                 else            // normal case
                 {
                     // fprintf(stderr, "child:%d stopped with signal %ld\n", child, stopsig);
-                    print_syscall(child, done_syscalls);
+                    handle_syscall(child, done_syscalls);
                 }
             }
             else
@@ -503,7 +508,7 @@ int main(int argc, char **argv)
 
 //             /* pre syscall */
 
-//             print_syscall(child, syscall_req);
+//             handle_syscall(child, syscall_req);
 //             fprintf(stderr, "\n");
 
 //             if (wait_for_syscall(child) != 0)
@@ -513,7 +518,7 @@ int main(int argc, char **argv)
 
 //             /* post syscall */
 
-//             print_syscall(child, syscall_req);
+//             handle_syscall(child, syscall_req);
 
 //             retval = get_reg(child, eax);
 //             assert(errno == 0);
