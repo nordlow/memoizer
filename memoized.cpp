@@ -62,6 +62,8 @@ struct Trace
     PathsByPid outPathsByPid;
     /// Stated file paths by pid.
     PathsByPid statPathsByPid;
+
+    SHA256_CTX inputHash;
 };
 
 /** Wait for system call in `child`. */
@@ -418,8 +420,7 @@ int do_child(int argc, char **argv)
 
 int ptrace_of_top_child(pid_t top_child, Trace& trace)
 {
-    SHA256_CTX hash;
-    SHA256_Init(&hash);
+    SHA256_Init(&trace.inputHash);
     // int SHA256_Update(SHA256_CTX *c, const void *data, size_t len);
     // int SHA256_Final(unsigned char *md, SHA256_CTX *c);
 
