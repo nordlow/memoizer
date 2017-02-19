@@ -307,7 +307,7 @@ void handle_syscall(pid_t child,
                 syscall_num == SYS_lstat ||
                 syscall_num == SYS_access) // file system syscalls with path as first argument
             {
-                char* path_c = read_string(child, get_syscall_arg(child, 0));
+                char* const path_c = read_string(child, get_syscall_arg(child, 0));
                 printf("%s\n", path_c);
                 std::string path = path_c;
                 free(path_c);
