@@ -49,6 +49,7 @@ typedef std::vector<std::string> DoneSyscalls[MAX_SYSCALL_NUM + 1];
 /// Paths by pid.
 typedef std::map<pid_t, std::string> PathsByPid;
 
+/// Trace results.
 struct Trace
 {
     DoneSyscalls doneSyscalls;
