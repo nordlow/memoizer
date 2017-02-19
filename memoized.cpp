@@ -357,7 +357,8 @@ void handle_syscall(pid_t child,
                     {
                         fprintf(stderr, " ------- flags:%lx, mode:%lx, flags:", flags, mode);
 
-                        if (show)
+                        const bool verbose = true;
+                        if (verbose)
                         {
                             // print flags
                             if (flags & O_RDONLY) { fprintf(stderr, " O_RDONLY"); }
