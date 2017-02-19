@@ -131,7 +131,7 @@ long get_syscall_arg(pid_t child, int which)
 }
 
 /** Allocate and return a copy of a null-terminated C string at `addr`. */
-char *read_string(pid_t child, unsigned long addr)
+char *readString(pid_t child, unsigned long addr)
 {
     uint allocated = 4096;
     char *val = reinterpret_cast<char*>(malloc(allocated));
@@ -182,7 +182,7 @@ void print_syscall_args(pid_t child, int num)
         {
             if (i == 0)
             {
-                strval = read_string(child, arg);
+                strval = readString(child, arg);
                 fprintf(stderr, "\"%s\"", strval);
                 free(strval);
                 goto done;
@@ -207,7 +207,7 @@ void print_syscall_args(pid_t child, int num)
         {
             if (i == 0)
             {
-                strval = read_string(child, arg);
+                strval = readString(child, arg);
                 fprintf(stderr, "\"%s\"", strval);
                 free(strval);
                 goto done;
@@ -222,7 +222,7 @@ void print_syscall_args(pid_t child, int num)
         {
             if (i == 1)
             {
-                strval = read_string(child, arg);
+                strval = readString(child, arg);
                 fprintf(stderr, "\"%s\"", strval);
                 free(strval);
                 goto done;
@@ -232,7 +232,7 @@ void print_syscall_args(pid_t child, int num)
         {
             if (i == 2)
             {
-                strval = read_string(child, arg);
+                strval = readString(child, arg);
                 fprintf(stderr, "\"%s\"", strval);
                 free(strval);
                 goto done;
@@ -246,7 +246,7 @@ void print_syscall_args(pid_t child, int num)
             fprintf(stderr, "%ld", arg);
             break;
         case ARG_STR:
-            strval = read_string(child, arg);
+            strval = readString(child, arg);
             fprintf(stderr, "\"%s\"", strval);
             free(strval);
             break;
@@ -308,7 +308,7 @@ void handle_syscall(pid_t child,
                 syscall_num == SYS_access) // file system syscalls with path as first argument
             {
                 // TODO prevent allocation
-                char* const pathC = read_string(child, get_syscall_arg(child, 0)); // TODO prevent allocation
+                char* const pathC = readString(child, get_syscall_arg(child, 0)); // TODO prevent allocation
                 std::string path = pathC;
                 free(pathC);    // TODO prevent deallocation
 
