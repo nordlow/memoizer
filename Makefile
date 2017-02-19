@@ -10,7 +10,7 @@ all: memoized
 syscallents.h: $(GEN_TABLES)
 	$(GEN_TABLES) $(LINUX_SRC)
 
-memoized: memoized.cpp syscalls.h syscallents.h
+memoized: memoized.cpp syscalls.h syscallents.h Makefile
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $<
 
 clean:
