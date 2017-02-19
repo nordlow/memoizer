@@ -583,7 +583,6 @@ int main(int argc, char **argv)
     else                        /* in the parent */
     {
         attachAndPtraceTopChild(child);
-        /* return do_trace_top(child, syscall); */
     }
 }
 
