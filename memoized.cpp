@@ -47,10 +47,13 @@ long __get_reg(pid_t child, int off)
 typedef std::vector<std::string> DoneSyscalls[MAX_SYSCALL_NUM + 1];
 
 /// Read-only opened file paths by pid.
-typedef std::map<pid_t, std::string> inPathsByPid;
+typedef std::map<pid_t, std::string> InPathsByPid;
 
 /// Write-only opened file paths by pid.
-typedef std::map<pid_t, std::string> outPathsByPid;
+typedef std::map<pid_t, std::string> OutPathsByPid;
+
+InPathsByPid inPathsByPid;
+OutPathsByPid outPathsByPid;
 
 /** Wait for system call in `child`. */
 int wait_for_syscall(pid_t child)
