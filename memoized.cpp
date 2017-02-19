@@ -281,7 +281,7 @@ void printSyscall(pid_t child, long syscall_num, long retval)
 void handleSyscall(pid_t child,
                    Trace& trace)
 {
-    const bool show = false;
+    const bool show = true;
     long syscall_num;                    // syscall number
     syscall_num = getReg(child, orig_eax);
     assert(errno == 0);
@@ -321,6 +321,10 @@ void handleSyscall(pid_t child,
 
                 switch (syscall_num)
                 {
+                case SYS_stat:
+                {
+                    break;
+                }
                 case SYS_open:
                 {
                     // decode open arguments
