@@ -53,7 +53,7 @@ typedef std::map<pid_t, std::string> PathsByPid;
 PathsByPid inPathsByPid;
 /// Write-only opened file paths by pid.
 PathsByPid outPathsByPid;
-/// Stat opened file paths by pid.
+/// Stated file paths by pid.
 PathsByPid statPathsByPid;
 
 /** Wait for system call in `child`. */
