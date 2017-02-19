@@ -368,20 +368,17 @@ void handleSyscall(pid_t child,
                     // access time
                     const time_t atime = stat.st_atime;
 
-                    if (show)
+                    if (ctime)
                     {
-                        if (ctime)
-                        {
-                            fprintf(stderr, " ctime:%lu", ctime);
-                        }
-                        if (mtime)
-                        {
-                            fprintf(stderr, " mtime:%lu", mtime);
-                        }
-                        if (atime)
-                        {
-                            fprintf(stderr, " atime:%lu", atime);
-                        }
+                        if (show) { fprintf(stderr, " ctime:%lu", ctime); }
+                    }
+                    if (mtime)
+                    {
+                        if (show) { fprintf(stderr, " mtime:%lu", mtime); }
+                    }
+                    if (atime)
+                    {
+                        if (show) { fprintf(stderr, " atime:%lu", atime); }
                     }
 
                     break;
