@@ -160,7 +160,7 @@ char *readString(pid_t child, unsigned long addr)
     return val;
 }
 
-void print_syscall_args(pid_t child, int num)
+void printSyscallArgs(pid_t child, int num)
 {
     const char * sname = syscall_name_of_number(num);
     struct syscall_entry *ent = NULL;
@@ -273,7 +273,7 @@ void endl(FILE* file = stderr)
 void print_syscall(pid_t child, long syscall_num, long retval)
 {
     fprintf(stderr, "%d %s(", child, syscall_name_of_number(syscall_num));
-    print_syscall_args(child, syscall_num);
+    printSyscallArgs(child, syscall_num);
     fprintf(stderr, ") = ");
     fprintf(stderr, "%ld", retval);
 }
