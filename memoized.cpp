@@ -359,14 +359,9 @@ void handleSyscall(pid_t child,
                 {
                     const struct stat stat = readStat(child, pidSyscallArg(child, 1));
 
-                    // creation time
-                    const time_t ctime = stat.st_ctime;
-
-                    // modification time
-                    const time_t mtime = stat.st_mtime;
-
-                    // access time
-                    const time_t atime = stat.st_atime;
+                    const time_t ctime = stat.st_ctime; // creation
+                    const time_t mtime = stat.st_mtime; // modification
+                    const time_t atime = stat.st_atime; // access
 
                     if (ctime)
                     {
