@@ -7,6 +7,7 @@
 #include <fcntl.h>
 #include <syscall.h>
 
+// C library
 #include <unistd.h>
 #include <cstdlib>
 #include <cstdio>
@@ -14,14 +15,17 @@
 #include <cassert>
 #include <cstring>
 
+// OpenSSL
 #include <openssl/sha.h>
 
-#include "syscalls.h"
-#include "syscallents.h"
-
+// STL
 #include <vector>
 #include <string>
 #include <map>
+
+// system calls
+#include "syscalls.h"
+#include "syscallents.h"
 
 /* cheap trick for reading syscall number / return value. */
 #ifdef __amd64__
