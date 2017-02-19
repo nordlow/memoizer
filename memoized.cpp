@@ -111,7 +111,7 @@ const char *syscallNameOfNumber(int syscallNumber)
     return buf;
 }
 
-long childPidSyscallArg(pid_t child, int which)
+long pidSyscallArg(pid_t child, int which)
 {
     switch (which)
     {
@@ -179,7 +179,7 @@ void printSyscallArgs(pid_t child, int num)
     }
     for (i = 0; i < nargs; i++) // incorrectly always 6
     {
-        const long arg = childPidSyscallArg(child, i);
+        const long arg = pidSyscallArg(child, i);
         const int type = ent ? ent->args[i] : ARG_PTR;
 
         if (strcmp(sname, "execve") == 0)
@@ -312,7 +312,7 @@ void handleSyscall(pid_t child,
                 syscall_num == SYS_access) // file system syscalls with path as first argument
             {
                 // TODO prevent allocation
-                char* const pathC = readString(child, childPidSyscallArg(child, 0)); // TODO prevent allocation
+                char* const pathC = readString(child, pidSyscallArg(child, 0)); // TODO prevent allocation
                 std::string path = pathC;
                 free(pathC);    // TODO prevent deallocation
 
@@ -328,7 +328,7 @@ void handleSyscall(pid_t child,
                 case SYS_stat:
                 case SYS_lstat:
                 {
-                    const struct stat* buf = reinterpret_cast<struct stat*>(childPidSyscallArg(child, 1));
+                    const struct stat* buf = reinterpret_cast<struct stat*>(pidSyscallArg(child, 1));
                     if (show)
                     {
                         printf(" buf:%p\n", buf);
@@ -339,10 +339,10 @@ void handleSyscall(pid_t child,
                 case SYS_open:
                 {
                     // decode open arguments
-                    const auto flags = childPidSyscallArg(child, 1);
+                    const auto flags = pidSyscallArg(child, 1);
 
                     // mode in case a new file is created
-                    const auto mode = childPidSyscallArg(child, 2);
+                    const auto mode = pidSyscallArg(child, 2);
 
                     // true if this open only reads from file
                     const bool read_flag = ((flags & (O_RDONLY)) ||
