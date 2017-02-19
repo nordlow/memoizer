@@ -96,18 +96,18 @@ int waitForChildPidSyscall(pid_t child)
     }
 }
 
-const char *syscallNameOfNumber(int syscall_number)
+const char *syscallNameOfNumber(int syscallNumber)
 {
-    if (syscall_number <= MAX_SYSCALL_NUM)
+    if (syscallNumber <= MAX_SYSCALL_NUM)
     {
-        struct syscall_entry *ent = &syscalls[syscall_number];
+        struct syscall_entry *ent = &syscalls[syscallNumber];
         if (ent->name)
         {
             return ent->name;
         }
     }
     static char buf[128];
-    snprintf(buf, sizeof buf, "sys_%d", syscall_number);
+    snprintf(buf, sizeof buf, "sys_%d", syscallNumber);
     return buf;
 }
 
