@@ -171,10 +171,9 @@ struct stat readStat(pid_t child, unsigned long addr)
     struct stat stat;
     uint8_t* statptr = reinterpret_cast<uint8_t*>(&stat); // TODO byte
     int read = 0;
-    unsigned long tmp;
     while (true)
     {
-        tmp = ptrace(PTRACE_PEEKDATA, child, addr + read);
+        unsigned long tmp = ptrace(PTRACE_PEEKDATA, child, addr + read);
         if (errno != 0)
         {
             break;
