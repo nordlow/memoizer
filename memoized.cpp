@@ -49,12 +49,17 @@ typedef std::vector<std::string> DoneSyscalls[MAX_SYSCALL_NUM + 1];
 /// Paths by pid.
 typedef std::map<pid_t, std::string> PathsByPid;
 
-/// Read-only opened file paths by pid.
-PathsByPid inPathsByPid;
-/// Write-only opened file paths by pid.
-PathsByPid outPathsByPid;
-/// Stated file paths by pid.
-PathsByPid statPathsByPid;
+struct Trace
+{
+    DoneSyscalls done_syscalls;
+
+    /// Read-only opened file paths by pid.
+    PathsByPid inPathsByPid;
+    /// Write-only opened file paths by pid.
+    PathsByPid outPathsByPid;
+    /// Stated file paths by pid.
+    PathsByPid statPathsByPid;
+};
 
 /** Wait for system call in `child`. */
 int wait_for_syscall(pid_t child)
@@ -269,7 +274,7 @@ void print_syscall(pid_t child, long syscall_num, long retval)
 }
 
 void handle_syscall(pid_t child,
-                   DoneSyscalls& done_syscalls)
+                    Trace& trace)
 {
     long syscall_num;                    // syscall number
     syscall_num = get_reg(child, orig_eax);
@@ -297,7 +302,7 @@ void handle_syscall(pid_t child,
                 syscall_num == SYS_access) // file reads
             {
                 const char* path = "";
-                done_syscalls[syscall_num].push_back(std::string(path));
+                trace.done_syscalls[syscall_num].push_back(std::string(path));
 
                 print_syscall(child, syscall_num, retval);
 
@@ -405,7 +410,7 @@ int ptrace_of_top_child(pid_t top_child)
     // int SHA256_Update(SHA256_CTX *c, const void *data, size_t len);
     // int SHA256_Final(unsigned char *md, SHA256_CTX *c);
 
-    DoneSyscalls done_syscalls;
+    Trace trace;
 
     while (true)
     {
@@ -450,7 +455,7 @@ int ptrace_of_top_child(pid_t top_child)
                 else            // normal case
                 {
                     // fprintf(stderr, "child:%d stopped with signal %ld\n", child, stopsig);
-                    handle_syscall(child, done_syscalls);
+                    handle_syscall(child, trace);
                 }
             }
             else
