@@ -154,12 +154,42 @@ char *readString(pid_t child, unsigned long addr)
             val[read] = 0;
             break;
         }
-        memcpy(val + read, &tmp, sizeof tmp);
-        if (memchr(&tmp, 0, sizeof tmp) != NULL)
+        memcpy(val + read, &tmp, sizeof(tmp));
+        if (memchr(&tmp, 0, sizeof(tmp)) != NULL)
         {
             break;
         }
-        read += sizeof tmp;
+        read += sizeof(tmp);
+    }
+    return val;
+}
+
+/** Allocate and return a copy of a null-terminated C string at `addr`. */
+char *readStat(pid_t child, unsigned long addr)
+{
+    uint allocated = sizeof(struct stat);
+    char *val = reinterpret_cast<char*>(malloc(allocated));
+    int read = 0;
+    unsigned long tmp;
+    while (true)
+    {
+        if (read + sizeof(tmp) > allocated)
+        {
+            allocated *= 2;
+            val = reinterpret_cast<char*>(realloc(val, allocated));
+        }
+        tmp = ptrace(PTRACE_PEEKDATA, child, addr + read);
+        if (errno != 0)
+        {
+            val[read] = 0;
+            break;
+        }
+        memcpy(val + read, &tmp, sizeof(tmp));
+        if (memchr(&tmp, 0, sizeof(tmp)) != NULL)
+        {
+            break;
+        }
+        read += sizeof(tmp);
     }
     return val;
 }
@@ -329,11 +359,15 @@ void handleSyscall(pid_t child,
                 case SYS_lstat:
                 {
                     const struct stat* buf = reinterpret_cast<struct stat*>(pidSyscallArg(child, 1));
-                    if (show)
+                    if (buf)
                     {
-                        printf(" buf:%p\n", buf);
+                        if (show)
+                        {
+                            printf(" buf:%p", buf);
+                        }
+                        const auto mtime = buf->st_mtime; // modification time
+                        // printf(" mtime:%ld", mtime);
                     }
-                    const auto mtime = buf->st_mtime; // modification time
                     break;
                 }
                 case SYS_open:
