@@ -270,7 +270,7 @@ void endl(FILE* file = stderr)
     fprintf(file, "\n");
 }
 
-void print_syscall(pid_t child, long syscall_num, long retval)
+void printSyscall(pid_t child, long syscall_num, long retval)
 {
     fprintf(stderr, "%d %s(", child, syscallNameOfNumber(syscall_num));
     printSyscallArgs(child, syscall_num);
@@ -278,8 +278,8 @@ void print_syscall(pid_t child, long syscall_num, long retval)
     fprintf(stderr, "%ld", retval);
 }
 
-void handle_syscall(pid_t child,
-                    Trace& trace)
+void handleSyscall(pid_t child,
+                   Trace& trace)
 {
     const bool show = false;
     long syscall_num;                    // syscall number
@@ -316,7 +316,7 @@ void handle_syscall(pid_t child,
 
                 if (show)
                 {
-                    print_syscall(child, syscall_num, retval);
+                    printSyscall(child, syscall_num, retval);
                 }
 
                 switch (syscall_num)
@@ -405,7 +405,7 @@ void handle_syscall(pid_t child,
             const bool verbose = false;
             if (verbose)
             {
-                print_syscall(child, syscall_num, retval);
+                printSyscall(child, syscall_num, retval);
                 endl();
             }
         }
@@ -481,7 +481,7 @@ int ptrace_of_top_child(pid_t top_child, Trace& trace)
                 else            // normal case
                 {
                     // fprintf(stderr, "child:%d stopped with signal %ld\n", child, stopsig);
-                    handle_syscall(child, trace);
+                    handleSyscall(child, trace);
                 }
             }
             else
@@ -629,7 +629,7 @@ int main(int argc, char **argv)
 
 //             /* pre syscall */
 
-//             handle_syscall(child, syscall_req);
+//             handleSyscall(child, syscall_req);
 //             fprintf(stderr, "\n");
 
 //             if (waitForChildPidSyscall(child) != 0)
@@ -639,7 +639,7 @@ int main(int argc, char **argv)
 
 //             /* post syscall */
 
-//             handle_syscall(child, syscall_req);
+//             handleSyscall(child, syscall_req);
 
 //             retval = getReg(child, eax);
 //             assert(errno == 0);
