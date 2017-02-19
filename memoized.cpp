@@ -67,7 +67,7 @@ struct Trace
 };
 
 /** Wait for system call in `child`. */
-int wait_for_syscall(pid_t child)
+int waitForChildPidSyscall(pid_t child)
 {
     while (true)
     {
@@ -622,7 +622,7 @@ int main(int argc, char **argv)
 //             if (false)
 //                 fprintf(stderr, "child:%d\n", child);
 
-//             if (wait_for_syscall(child) != 0)
+//             if (waitForChildPidSyscall(child) != 0)
 //             {
 //                 goto done;      /* TODO remove child from list of children */
 //             }
@@ -632,7 +632,7 @@ int main(int argc, char **argv)
 //             handle_syscall(child, syscall_req);
 //             fprintf(stderr, "\n");
 
-//             if (wait_for_syscall(child) != 0)
+//             if (waitForChildPidSyscall(child) != 0)
 //             {
 //                 goto done;      /* TODO remove child from list of children */
 //             }
