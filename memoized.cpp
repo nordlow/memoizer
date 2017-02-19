@@ -92,7 +92,7 @@ int waitForChildPidSyscall(pid_t child)
     }
 }
 
-const char *syscall_name_of_number(int syscall_number)
+const char *syscallNameOfNumber(int syscall_number)
 {
     if (syscall_number <= MAX_SYSCALL_NUM)
     {
@@ -162,7 +162,7 @@ char *readString(pid_t child, unsigned long addr)
 
 void printSyscallArgs(pid_t child, int num)
 {
-    const char * sname = syscall_name_of_number(num);
+    const char * sname = syscallNameOfNumber(num);
     struct syscall_entry *ent = NULL;
     int nargs = SYSCALL_MAXARGS;
     int i;
@@ -272,7 +272,7 @@ void endl(FILE* file = stderr)
 
 void print_syscall(pid_t child, long syscall_num, long retval)
 {
-    fprintf(stderr, "%d %s(", child, syscall_name_of_number(syscall_num));
+    fprintf(stderr, "%d %s(", child, syscallNameOfNumber(syscall_num));
     printSyscallArgs(child, syscall_num);
     fprintf(stderr, ") = ");
     fprintf(stderr, "%ld", retval);
