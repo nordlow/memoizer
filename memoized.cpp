@@ -107,7 +107,7 @@ const char *syscall_name_of_number(int syscall_number)
     return buf;
 }
 
-long get_syscall_arg(pid_t child, int which)
+long childPidSyscallArg(pid_t child, int which)
 {
     switch (which)
     {
@@ -175,7 +175,7 @@ void print_syscall_args(pid_t child, int num)
     }
     for (i = 0; i < nargs; i++) // incorrectly always 6
     {
-        const long arg = get_syscall_arg(child, i);
+        const long arg = childPidSyscallArg(child, i);
         const int type = ent ? ent->args[i] : ARG_PTR;
 
         if (strcmp(sname, "execve") == 0)
@@ -308,7 +308,7 @@ void handle_syscall(pid_t child,
                 syscall_num == SYS_access) // file system syscalls with path as first argument
             {
                 // TODO prevent allocation
-                char* const pathC = readString(child, get_syscall_arg(child, 0)); // TODO prevent allocation
+                char* const pathC = readString(child, childPidSyscallArg(child, 0)); // TODO prevent allocation
                 std::string path = pathC;
                 free(pathC);    // TODO prevent deallocation
 
@@ -324,10 +324,10 @@ void handle_syscall(pid_t child,
                 case SYS_open:
                 {
                     // decode open arguments
-                    const auto flags = get_syscall_arg(child, 1);
+                    const auto flags = childPidSyscallArg(child, 1);
 
                     // mode in case a new file is created
-                    const auto mode = get_syscall_arg(child, 2);
+                    const auto mode = childPidSyscallArg(child, 2);
 
                     // true if this open only reads from file
                     const bool read_flag = ((flags & (O_RDONLY)) ||
