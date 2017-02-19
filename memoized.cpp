@@ -309,7 +309,6 @@ void handle_syscall(pid_t child,
             {
                 // TODO prevent allocation
                 char* const pathC = read_string(child, get_syscall_arg(child, 0));
-                printf("%s\n", pathC);
                 std::string path = pathC;
                 free(pathC);
 
