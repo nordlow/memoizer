@@ -341,6 +341,7 @@ void handle_syscall(pid_t child,
                     {
                         trace.inPathsByPid[child].push_back(std::string(path));
                     }
+
                     if (write_flag)
                     {
                         trace.outPathsByPid[child].push_back(std::string(path));
