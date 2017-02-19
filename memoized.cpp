@@ -415,7 +415,7 @@ void handleSyscall(pid_t child,
     }
 }
 
-int do_child(int argc, char **argv)
+int doChild(int argc, char **argv)
 {
     char *args [argc+1];
     int i;
@@ -578,7 +578,7 @@ int main(int argc, char **argv)
 
     if (child == 0)             /* in the child */
     {
-        return do_child(argc-push, argv+push);
+        return doChild(argc-push, argv+push);
     }
     else                        /* in the parent */
     {
