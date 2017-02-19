@@ -3,7 +3,7 @@ LINUX_SRC=/usr/include/asm
 
 CXX=g++
 CXXFLAGS=-Wall -Wextra -O2 -g -std=c++11
-LDFLAGS=-lssl -lcrypto		# for SHA-hash support
+LDFLAGS=-lssl -lcrypto		# SHA support
 
 all: memoized
 
