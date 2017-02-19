@@ -49,8 +49,11 @@ typedef std::vector<std::string> DoneSyscalls[MAX_SYSCALL_NUM + 1];
 /// Paths by pid.
 typedef std::map<pid_t, std::string> PathsByPid;
 
+/// Read-only opened file paths by pid.
 PathsByPid inPathsByPid;
+/// Write-only opened file paths by pid.
 PathsByPid outPathsByPid;
+/// Stat opened file paths by pid.
 PathsByPid statPathsByPid;
 
 /** Wait for system call in `child`. */
