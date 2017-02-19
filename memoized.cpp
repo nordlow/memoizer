@@ -326,7 +326,14 @@ void handleSyscall(pid_t child,
                 switch (syscall_num)
                 {
                 case SYS_stat:
+                case SYS_lstat:
                 {
+                    struct stat* buf = reinterpret_cast<struct stat*>(childPidSyscallArg(child, 1));
+                    if (show)
+                    {
+                        printf(" buf:%p\n", buf);
+                    }
+                    const auto mtime = buf->st_mtime; // modification time
                     break;
                 }
                 case SYS_open:
