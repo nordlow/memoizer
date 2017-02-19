@@ -300,9 +300,9 @@ void handle_syscall(pid_t child,
                 syscall_num == SYS_stat ||
                 syscall_num == SYS_statfs ||
                 syscall_num == SYS_lstat ||
-                syscall_num == SYS_access) // file reads
+                syscall_num == SYS_access) // file system syscalls with path as first argument
             {
-                const char* path = "";
+                const char* path = ""; // TODO lookup path
                 trace.doneSyscalls[syscall_num].push_back(std::string(path));
 
                 print_syscall(child, syscall_num, retval);
@@ -334,6 +334,11 @@ void handle_syscall(pid_t child,
 
                     // assure that we decoded correctly
                     assert(read_flag || write_flag);
+
+                    if (read_flag)
+                    {
+                        trace.InPathsByPid[pid] = ;
+                    }
 
                     fprintf(stderr, " ------- flags:%lx, mode:%lx, flags:", flags, mode);
 
