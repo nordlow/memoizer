@@ -370,9 +370,18 @@ void handleSyscall(pid_t child,
 
                     if (show)
                     {
-                        fprintf(stderr, " ctime:%lu", ctime);
-                        fprintf(stderr, " mtime:%lu", mtime);
-                        fprintf(stderr, " atime:%lu", atime);
+                        if (ctime)
+                        {
+                            fprintf(stderr, " ctime:%lu", ctime);
+                        }
+                        if (mtime)
+                        {
+                            fprintf(stderr, " mtime:%lu", mtime);
+                        }
+                        if (atime)
+                        {
+                            fprintf(stderr, " atime:%lu", atime);
+                        }
                     }
 
                     break;
