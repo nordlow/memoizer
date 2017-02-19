@@ -165,7 +165,9 @@ char *readString(pid_t child, unsigned long addr)
     return val;
 }
 
-/** Allocate and return a copy of a null-terminated C string at `addr`. */
+/** Allocate and return a copy of a null-terminated C string at `addr`.
+    TODO templatize on struct stat
+ */
 struct stat readStat(pid_t child, unsigned long addr)
 {
     struct stat stat;
