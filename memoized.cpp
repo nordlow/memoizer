@@ -432,7 +432,7 @@ int doChild(int argc, char **argv)
     return execvp(args[0], args);
 }
 
-int ptraceOfTopChild(pid_t top_child, Trace& trace)
+int ptraceTopChild(pid_t top_child, Trace& trace)
 {
     SHA256_Init(&trace.inputHash);
     // int SHA256_Update(SHA256_CTX *c, const void *data, size_t len);
@@ -517,7 +517,7 @@ void attachAndPtraceProcess(pid_t top_child)
 
     Trace trace;
 
-    ptraceOfTopChild(top_child, trace);
+    ptraceTopChild(top_child, trace);
 }
 
 int main(int argc, char **argv)
