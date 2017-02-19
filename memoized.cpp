@@ -43,11 +43,13 @@ long __get_reg(pid_t child, int off)
     return val;
 }
 
+typedef std::vector<std::string> Paths;
+
 /// System calls executed.
 typedef std::vector<std::string> DoneSyscalls[MAX_SYSCALL_NUM + 1];
 
 /// Paths by pid.
-typedef std::map<pid_t, std::string> PathsByPid;
+typedef std::map<pid_t, Paths> PathsByPid;
 
 /// Trace results.
 struct Trace
@@ -337,11 +339,11 @@ void handle_syscall(pid_t child,
 
                     if (read_flag)
                     {
-                        trace.inPathsByPid[child] = std::string(path);
+                        trace.inPathsByPid[child].push_back(std::string(path));
                     }
                     if (write_flag)
                     {
-                        trace.outPathsByPid[child] = std::string(path);
+                        trace.outPathsByPid[child].push_back(std::string(path));
                     }
 
                     fprintf(stderr, " ------- flags:%lx, mode:%lx, flags:", flags, mode);
