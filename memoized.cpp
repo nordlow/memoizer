@@ -356,7 +356,8 @@ void handleSyscall(pid_t child,
                 case SYS_lstat:
                 {
                     const struct stat stat = readStat(child, pidSyscallArg(child, 1));
-                    const auto mtime = stat.st_mtime; // modification time
+                    const time_t mtime = stat.st_mtime; // modification time
+                    const time_t ctime = stat.st_ctime; // creation time
                     fprintf(stderr, " mtime:%ld", mtime);
                     break;
                 }
