@@ -51,7 +51,7 @@ typedef std::map<pid_t, std::string> PathsByPid;
 
 struct Trace
 {
-    DoneSyscalls done_syscalls;
+    DoneSyscalls doneSyscalls;
 
     /// Read-only opened file paths by pid.
     PathsByPid inPathsByPid;
@@ -302,7 +302,7 @@ void handle_syscall(pid_t child,
                 syscall_num == SYS_access) // file reads
             {
                 const char* path = "";
-                trace.done_syscalls[syscall_num].push_back(std::string(path));
+                trace.doneSyscalls[syscall_num].push_back(std::string(path));
 
                 print_syscall(child, syscall_num, retval);
 
