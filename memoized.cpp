@@ -171,7 +171,7 @@ char *readString(pid_t child, unsigned long addr)
 struct stat readStat(pid_t child, unsigned long addr)
 {
     struct stat stat;
-    uint8_t* statptr = reinterpret_cast<uint8_t*>(&stat); // TODO byte
+    uint8_t* statPtr = reinterpret_cast<uint8_t*>(&stat); // TODO byte
     int read = 0;
     while (true)
     {
@@ -180,7 +180,7 @@ struct stat readStat(pid_t child, unsigned long addr)
         {
             break;
         }
-        memcpy(statptr + read, &tmp, sizeof(tmp));
+        memcpy(statPtr + read, &tmp, sizeof(tmp));
         if (memchr(&tmp, 0, sizeof(tmp)) != NULL)
         {
             break;
