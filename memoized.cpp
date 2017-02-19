@@ -281,7 +281,7 @@ void print_syscall(pid_t child, long syscall_num, long retval)
 void handle_syscall(pid_t child,
                     Trace& trace)
 {
-    const bool show = true;
+    const bool show = false;
     long syscall_num;                    // syscall number
     syscall_num = get_reg(child, orig_eax);
     assert(errno == 0);
@@ -307,8 +307,11 @@ void handle_syscall(pid_t child,
                 syscall_num == SYS_lstat ||
                 syscall_num == SYS_access) // file system syscalls with path as first argument
             {
-                const char* path = ""; // TODO lookup path
-                trace.doneSyscalls[syscall_num].push_back(std::string(path));
+                char* path_c = read_string(child, 0);
+                std::string path = path_c;
+                free(path_c);
+
+                trace.doneSyscalls[syscall_num].push_back(path);
 
                 if (show)
                 {
@@ -388,7 +391,10 @@ void handle_syscall(pid_t child,
                     break;
                 }
 
-                endl();
+                if (show)
+                {
+                    endl();
+                }
             }
             if (syscall_num == SYS_execve ||
                 syscall_num == SYS_vfork)
