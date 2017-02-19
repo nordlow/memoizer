@@ -308,9 +308,9 @@ void handle_syscall(pid_t child,
                 syscall_num == SYS_access) // file system syscalls with path as first argument
             {
                 // TODO prevent allocation
-                char* const pathC = read_string(child, get_syscall_arg(child, 0));
+                char* const pathC = read_string(child, get_syscall_arg(child, 0)); // TODO prevent allocation
                 std::string path = pathC;
-                free(pathC);
+                free(pathC);    // TODO prevent deallocation
 
                 trace.doneSyscalls[syscall_num].push_back(path);
 
