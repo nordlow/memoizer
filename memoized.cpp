@@ -48,6 +48,8 @@ long __get_reg(pid_t child, int off)
     return val;
 }
 
+typedef unsigned long ulong;
+
 typedef std::vector<std::string> Paths;
 
 /// System calls executed.
@@ -356,9 +358,23 @@ void handleSyscall(pid_t child,
                 case SYS_lstat:
                 {
                     const struct stat stat = readStat(child, pidSyscallArg(child, 1));
-                    const time_t mtime = stat.st_mtime; // modification time
-                    const time_t ctime = stat.st_ctime; // creation time
-                    fprintf(stderr, " mtime:%ld", mtime);
+
+                    // creation time
+                    const time_t ctime = stat.st_ctime;
+
+                    // modification time
+                    const time_t mtime = stat.st_mtime;
+
+                    // access time
+                    const time_t atime = stat.st_atime;
+
+                    if (show)
+                    {
+                        fprintf(stderr, " ctime:%lu", ctime);
+                        fprintf(stderr, " mtime:%lu", mtime);
+                        fprintf(stderr, " atime:%lu", atime);
+                    }
+
                     break;
                 }
                 case SYS_open:
