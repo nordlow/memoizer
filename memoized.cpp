@@ -337,7 +337,11 @@ void handle_syscall(pid_t child,
 
                     if (read_flag)
                     {
-                        trace.InPathsByPid[pid] = ;
+                        trace.inPathsByPid[child] = std::string(path);
+                    }
+                    if (write_flag)
+                    {
+                        trace.outPathsByPid[child] = std::string(path);
                     }
 
                     fprintf(stderr, " ------- flags:%lx, mode:%lx, flags:", flags, mode);
