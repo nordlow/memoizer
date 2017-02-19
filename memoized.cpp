@@ -164,34 +164,30 @@ char *readString(pid_t child, unsigned long addr)
     return val;
 }
 
+typedef char ubyte;
+
 /** Allocate and return a copy of a null-terminated C string at `addr`. */
-char *readStat(pid_t child, unsigned long addr)
+struct stat readStat(pid_t child, unsigned long addr)
 {
-    uint allocated = sizeof(struct stat);
-    char *val = reinterpret_cast<char*>(malloc(allocated));
+    struct stat stat;
+    ubyte* statptr = reinterpret_cast<ubyte*>(&stat); // TODO byte
     int read = 0;
     unsigned long tmp;
     while (true)
     {
-        if (read + sizeof(tmp) > allocated)
-        {
-            allocated *= 2;
-            val = reinterpret_cast<char*>(realloc(val, allocated));
-        }
         tmp = ptrace(PTRACE_PEEKDATA, child, addr + read);
         if (errno != 0)
         {
-            val[read] = 0;
             break;
         }
-        memcpy(val + read, &tmp, sizeof(tmp));
+        memcpy(statptr + read, &tmp, sizeof(tmp));
         if (memchr(&tmp, 0, sizeof(tmp)) != NULL)
         {
             break;
         }
         read += sizeof(tmp);
     }
-    return val;
+    return stat;
 }
 
 void printSyscallArgs(pid_t child, int num)
