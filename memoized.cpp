@@ -416,14 +416,12 @@ int do_child(int argc, char **argv)
     return execvp(args[0], args);
 }
 
-int ptrace_of_top_child(pid_t top_child)
+int ptrace_of_top_child(pid_t top_child, Trace& trace)
 {
     SHA256_CTX hash;
     SHA256_Init(&hash);
     // int SHA256_Update(SHA256_CTX *c, const void *data, size_t len);
     // int SHA256_Final(unsigned char *md, SHA256_CTX *c);
-
-    Trace trace;
 
     while (true)
     {
@@ -484,14 +482,14 @@ int ptrace_of_top_child(pid_t top_child)
 
 void attach_and_ptrace_process(pid_t top_child)
 {
-    const long trace = ptrace(PTRACE_ATTACH, top_child, NULL, NULL);
-    if (trace == 0)             // success
+    const long traceRetVal = ptrace(PTRACE_ATTACH, top_child, NULL, NULL);
+    if (traceRetVal == 0)             // success
     {
         fprintf(stderr, "info: attached to %d\n",top_child);
     }
     else
     {
-        fprintf(stderr, "error: attach failed with return code %ld\n", trace);
+        fprintf(stderr, "error: attach failed with return code %ld\n", traceRetVal);
     }
 
     const long opt = (PTRACE_O_EXITKILL |
@@ -502,7 +500,9 @@ void attach_and_ptrace_process(pid_t top_child)
                       PTRACE_O_TRACEVFORKDONE);
     ptrace(PTRACE_SETOPTIONS, top_child, NULL, opt);
 
-    ptrace_of_top_child(top_child);
+    Trace trace;
+
+    ptrace_of_top_child(top_child, trace);
 }
 
 int main(int argc, char **argv)
