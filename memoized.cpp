@@ -34,7 +34,7 @@
 #define offsetof(a, b) __builtin_offsetof(a,b)
 #endif
 
-#define get_reg(child, name) __get_reg(child, offsetof(struct user, regs.name))
+#define getReg(child, name) __get_reg(child, offsetof(struct user, regs.name))
 
 long __get_reg(pid_t child, int off)
 {
@@ -112,19 +112,19 @@ long childPidSyscallArg(pid_t child, int which)
     switch (which)
     {
 #ifdef __amd64__
-    case 0: return get_reg(child, rdi);
-    case 1: return get_reg(child, rsi);
-    case 2: return get_reg(child, rdx);
-    case 3: return get_reg(child, r10);
-    case 4: return get_reg(child, r8);
-    case 5: return get_reg(child, r9);
+    case 0: return getReg(child, rdi);
+    case 1: return getReg(child, rsi);
+    case 2: return getReg(child, rdx);
+    case 3: return getReg(child, r10);
+    case 4: return getReg(child, r8);
+    case 5: return getReg(child, r9);
 #else
-    case 0: return get_reg(child, ebx);
-    case 1: return get_reg(child, ecx);
-    case 2: return get_reg(child, edx);
-    case 3: return get_reg(child, esi);
-    case 4: return get_reg(child, edi);
-    case 5: return get_reg(child, ebp);
+    case 0: return getReg(child, ebx);
+    case 1: return getReg(child, ecx);
+    case 2: return getReg(child, edx);
+    case 3: return getReg(child, esi);
+    case 4: return getReg(child, edi);
+    case 5: return getReg(child, ebp);
 #endif
     default: return -1L;
     }
@@ -283,11 +283,11 @@ void handle_syscall(pid_t child,
 {
     const bool show = false;
     long syscall_num;                    // syscall number
-    syscall_num = get_reg(child, orig_eax);
+    syscall_num = getReg(child, orig_eax);
     assert(errno == 0);
 
     // return value
-    long retval = get_reg(child, eax);
+    long retval = getReg(child, eax);
     assert(errno == 0);
     if (retval == -38)          // on call entry
     {
@@ -641,7 +641,7 @@ int main(int argc, char **argv)
 
 //             handle_syscall(child, syscall_req);
 
-//             retval = get_reg(child, eax);
+//             retval = getReg(child, eax);
 //             assert(errno == 0);
 
 //             fprintf(stderr, "%d\n", retval);
