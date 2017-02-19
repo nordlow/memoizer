@@ -328,7 +328,7 @@ void handleSyscall(pid_t child,
                 case SYS_stat:
                 case SYS_lstat:
                 {
-                    struct stat* buf = reinterpret_cast<struct stat*>(childPidSyscallArg(child, 1));
+                    const struct stat* buf = reinterpret_cast<struct stat*>(childPidSyscallArg(child, 1));
                     if (show)
                     {
                         printf(" buf:%p\n", buf);
