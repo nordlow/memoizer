@@ -178,7 +178,7 @@ struct stat readStat(pid_t child, unsigned long addr)
         unsigned long tmp = ptrace(PTRACE_PEEKDATA, child, addr + read);
         if (errno != 0)
         {
-            fprintf("memoized: error: cannot read ptrace(PTRACE_PEEKDATA)\n");
+            fprintf(stderr, "memoized: error: cannot read ptrace(PTRACE_PEEKDATA)\n");
             break;
         }
         memcpy(statPtr + read, &tmp, sizeof(tmp));
