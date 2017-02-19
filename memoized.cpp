@@ -495,7 +495,7 @@ int ptrace_of_top_child(pid_t top_child, Trace& trace)
     }
 }
 
-void attach_and_ptrace_process(pid_t top_child)
+void attachAndPtraceProcess(pid_t top_child)
 {
     const long traceRetVal = ptrace(PTRACE_ATTACH, top_child, NULL, NULL);
     if (traceRetVal == 0)             // success
@@ -582,7 +582,7 @@ int main(int argc, char **argv)
     }
     else                        /* in the parent */
     {
-        attach_and_ptrace_process(child);
+        attachAndPtraceProcess(child);
         /* return do_trace_top(child, syscall); */
     }
 }
