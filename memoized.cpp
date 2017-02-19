@@ -281,6 +281,7 @@ void print_syscall(pid_t child, long syscall_num, long retval)
 void handle_syscall(pid_t child,
                     Trace& trace)
 {
+    const bool show = true;
     long syscall_num;                    // syscall number
     syscall_num = get_reg(child, orig_eax);
     assert(errno == 0);
@@ -309,7 +310,10 @@ void handle_syscall(pid_t child,
                 const char* path = ""; // TODO lookup path
                 trace.doneSyscalls[syscall_num].push_back(std::string(path));
 
-                print_syscall(child, syscall_num, retval);
+                if (show)
+                {
+                    print_syscall(child, syscall_num, retval);
+                }
 
                 switch (syscall_num)
                 {
@@ -349,30 +353,32 @@ void handle_syscall(pid_t child,
                         trace.outPathsByPid[child].push_back(std::string(path));
                     }
 
-                    fprintf(stderr, " ------- flags:%lx, mode:%lx, flags:", flags, mode);
-
-                    const bool verbose = true;
-                    if (verbose)
+                    if (show)
                     {
-                        // print flags
-                        if (flags & O_RDONLY) { fprintf(stderr, " O_RDONLY"); }
-                        if (flags & O_WRONLY) { fprintf(stderr, " O_WRONLY"); }
-                        if (flags & O_RDWR) { fprintf(stderr, " O_RDWR"); }
-                        if (flags & O_DIRECTORY) { fprintf(stderr, " O_DIRECTORY"); }
-                        if (flags & O_CREAT) { fprintf(stderr, " O_CREAT"); }
-                        if (flags & O_TRUNC) { fprintf(stderr, " O_TRUNC"); }
-                        if (flags & O_APPEND) { fprintf(stderr, " O_APPEND"); }
-                        if (flags & O_CLOEXEC) { fprintf(stderr, " O_CLOEXEC"); }
-                        if (flags & O_DIRECT) { fprintf(stderr, " O_DIRECT"); }
-                        if (flags & O_DSYNC) { fprintf(stderr, " O_DSYNC"); }
-                        if (flags & O_EXCL) { fprintf(stderr, " O_EXCL"); }
-                        if (flags & O_LARGEFILE) { fprintf(stderr, " O_LARGEFILE"); }
-                        if (flags & O_NOATIME) { fprintf(stderr, " O_NOATIME"); }
-                        if (flags & O_NOCTTY) { fprintf(stderr, " O_NOCTTY"); }
-                        if (flags & O_NOFOLLOW) { fprintf(stderr, " O_NOFOLLOW"); }
+                        fprintf(stderr, " ------- flags:%lx, mode:%lx, flags:", flags, mode);
 
-                        if (read_flag) { fprintf(stderr, " READ"); }
-                        if (write_flag) { fprintf(stderr, " WRITE"); }
+                        if (show)
+                        {
+                            // print flags
+                            if (flags & O_RDONLY) { fprintf(stderr, " O_RDONLY"); }
+                            if (flags & O_WRONLY) { fprintf(stderr, " O_WRONLY"); }
+                            if (flags & O_RDWR) { fprintf(stderr, " O_RDWR"); }
+                            if (flags & O_DIRECTORY) { fprintf(stderr, " O_DIRECTORY"); }
+                            if (flags & O_CREAT) { fprintf(stderr, " O_CREAT"); }
+                            if (flags & O_TRUNC) { fprintf(stderr, " O_TRUNC"); }
+                            if (flags & O_APPEND) { fprintf(stderr, " O_APPEND"); }
+                            if (flags & O_CLOEXEC) { fprintf(stderr, " O_CLOEXEC"); }
+                            if (flags & O_DIRECT) { fprintf(stderr, " O_DIRECT"); }
+                            if (flags & O_DSYNC) { fprintf(stderr, " O_DSYNC"); }
+                            if (flags & O_EXCL) { fprintf(stderr, " O_EXCL"); }
+                            if (flags & O_LARGEFILE) { fprintf(stderr, " O_LARGEFILE"); }
+                            if (flags & O_NOATIME) { fprintf(stderr, " O_NOATIME"); }
+                            if (flags & O_NOCTTY) { fprintf(stderr, " O_NOCTTY"); }
+                            if (flags & O_NOFOLLOW) { fprintf(stderr, " O_NOFOLLOW"); }
+
+                            if (read_flag) { fprintf(stderr, " READ"); }
+                            if (write_flag) { fprintf(stderr, " WRITE"); }
+                        }
                     }
 
                     break;
