@@ -21,6 +21,7 @@
 
 #include <vector>
 #include <string>
+#include <map>
 
 /* cheap trick for reading syscall number / return value. */
 #ifdef __amd64__
@@ -44,6 +45,12 @@ long __get_reg(pid_t child, int off)
 
 /// System calls executed.
 typedef std::vector<std::string> DoneSyscalls[MAX_SYSCALL_NUM + 1];
+
+/// Read-only opened file paths.
+typedef std::vector<pid_t, std::string> inPaths;
+
+/// Write-only opened file paths.
+typedef std::vector<pid_t, std::string> outPaths;
 
 /** Wait for system call in `child`. */
 int wait_for_syscall(pid_t child)
