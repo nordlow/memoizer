@@ -14,6 +14,7 @@
 #include <cerrno>
 #include <cassert>
 #include <cstring>
+#include <cinttypes>
 
 // OpenSSL
 #include <openssl/sha.h>
@@ -164,13 +165,11 @@ char *readString(pid_t child, unsigned long addr)
     return val;
 }
 
-typedef char ubyte;
-
 /** Allocate and return a copy of a null-terminated C string at `addr`. */
 struct stat readStat(pid_t child, unsigned long addr)
 {
     struct stat stat;
-    ubyte* statptr = reinterpret_cast<ubyte*>(&stat); // TODO byte
+    uint8_t* statptr = reinterpret_cast<uint8_t*>(&stat); // TODO byte
     int read = 0;
     unsigned long tmp;
     while (true)
