@@ -114,7 +114,7 @@ const char *syscallNameOfNumber(int syscallNumber)
     return buf;
 }
 
-long pidSyscallArg(pid_t child, int which)
+ulong pidSyscallArg(pid_t child, int which)
 {
     switch (which)
     {
@@ -168,7 +168,7 @@ char *readString(pid_t child, unsigned long addr)
 }
 
 /** Allocate and return a copy of a null-terminated C string at `addr`.
-    TODO templatize T on struct stat
+    TODO templatize T on struct stat when moving to D
  */
 struct stat readStat(pid_t child, unsigned long addr)
 {
@@ -208,7 +208,7 @@ void printSyscallArgs(pid_t child, int num)
     }
     for (i = 0; i < nargs; i++) // incorrectly always 6
     {
-        const long arg = pidSyscallArg(child, i);
+        const ulong arg = pidSyscallArg(child, i);
         const int type = ent ? ent->args[i] : ARG_PTR;
 
         if (strcmp(sname, "execve") == 0)
