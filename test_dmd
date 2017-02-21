@@ -1,6 +1,5 @@
 #!/bin/bash
 
-make memoized
-
-make -C ~/Work/dmd -f posix.mak clean
+make memoized &&
+make -C ~/Work/dmd -f posix.mak clean &&
 ./memoized make -C ~/Work/dmd -f posix.mak

@@ -1,6 +1,5 @@
 #!/bin/bash
 
-make memoized
-
-scons -c -C ~/Work/knet
+make memoized &&
+scons -c -C ~/Work/knet &&
 ./memoized scons --no-cache -C ~/Work/knet
