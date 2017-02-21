@@ -355,7 +355,7 @@ void handleSyscall(pid_t child,
                 switch (syscall_num)
                 {
                 case SYS_stat:
-                case SYS_lstat:
+                case SYS_lstat: // TODO specialcase on lstat
                 {
                     const struct stat stat = readStat(child, pidSyscallArg(child, 1));
 
