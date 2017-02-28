@@ -12,3 +12,13 @@ Usage
 =====
 
 ```memoized <program> <program args>```
+
+Enables
+=======
+
+- caching
+- detection of process flow
+- safe of parallelization
+- immutable persistent storage of inputs and outputs
+- detect cyclic dependencies (inputs same as outputs)
+- find consumer inputs of producer of outputs
