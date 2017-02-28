@@ -17,8 +17,7 @@ Enables
 =======
 
 - caching
-- detection of process flow
+- detection of process flow---consumer inputs of producer of outputs
 - safe of parallelization
 - immutable persistent storage of inputs and outputs
 - detect cyclic dependencies (inputs same as outputs)
-- find consumer inputs of producer of outputs
