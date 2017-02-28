@@ -18,6 +18,6 @@ Enables
 
 - caching
 - detection of process flow: consumer inputs of producer of outputs
-- safe of parallelization
+- safe parallelization
 - immutable persistent storage of inputs and outputs
 - detect cyclic dependencies (inputs same as outputs)
