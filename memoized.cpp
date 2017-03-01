@@ -460,9 +460,21 @@ void handleSyscall(pid_t child,
                     endl();
                 }
             }
-            if (syscall_num == SYS_execve ||
-                syscall_num == SYS_vfork)
+            else if (syscall_num == SYS_execve ||
+                     syscall_num == SYS_vfork ||
+                     syscall_num == SYS_clone)
             {
+                // fprintf(stderr, "syscall_num:%d\n", syscall_num);
+                // printSyscall(child, syscall_num, retval);
+                // endl(stderr);
+                // endl(stderr);
+            }
+            else
+            {
+                // fprintf(stderr, "syscall_num:%d\n", syscall_num);
+                // printSyscall(child, syscall_num, retval);
+                // endl(stderr);
+                // endl(stderr);
             }
 
             const bool verbose = false;
