@@ -338,8 +338,7 @@ bool assertCacheDirTree()
     mkdir((home + "/.cache/memoized/calls").c_str(), mode);
 }
 
-void handleSyscall(pid_t child,
-                   Trace& trace)
+void handleSyscall(pid_t child, Trace& trace)
 {
     const long syscall_num = getReg(child, orig_eax);
     assert(errno == 0);
