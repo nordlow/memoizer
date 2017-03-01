@@ -329,6 +329,7 @@ void handleSyscall(pid_t child,
     assert(errno == 0);
     if (retval == -38)          // on call entry
     {
+        // printSyscall(child, syscall_num, retval); endl(stderr);
         // nothing useful to do here for now
     }
     else                        // on call return
