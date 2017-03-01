@@ -1,5 +1,6 @@
 memoized
 syscallents.h
+syscallents.d
 ministrace.o
 a.out
 *~
