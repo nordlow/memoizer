@@ -352,7 +352,7 @@ void handleSyscall(pid_t child,
                 std::string path = pathC;
                 free(pathC);    // TODO prevent deallocation
 
-                const bool isAbsolute = path[0] == '/';
+                const bool isAbsolute = !path.empty() && path[0] == '/';
 
                 trace.doneSyscalls[syscall_num].push_back(path);
 
@@ -368,16 +368,12 @@ void handleSyscall(pid_t child,
                 {
                     const struct stat stat = readStat(child, pidSyscallArg(child, 1));
 
-                    const time_t ctime = stat.st_ctime; // creation
+                    // const time_t ctime = stat.st_ctime; // creation
+                    // const time_t atime = stat.st_atime; // access
                     const time_t mtime = stat.st_mtime; // modification
-                    const time_t atime = stat.st_atime; // access
 
                     if (show)
                     {
-                        if (ctime)
-                        {
-                            fprintf(stderr, " ctime:%lu", ctime);
-                        }
                         if (mtime)
                         {
                             fprintf(stderr, " mtime:%lu", mtime);
