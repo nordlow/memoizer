@@ -200,6 +200,7 @@ void printSyscallArgs(pid_t child, int num)
     int nargs = SYSCALL_MAXARGS;
     int i;
     char *strval;
+    const bool show = false;
 
     if (num <= MAX_SYSCALL_NUM && syscalls[num].name)
     {
@@ -216,7 +217,7 @@ void printSyscallArgs(pid_t child, int num)
             if (i == 0)
             {
                 strval = readString(child, arg);
-                fprintf(stderr, "\"%s\"", strval);
+                if (show) fprintf(stderr, "\"%s\"", strval);
                 free(strval);
                 goto done;
             }
@@ -241,7 +242,7 @@ void printSyscallArgs(pid_t child, int num)
             if (i == 0)
             {
                 strval = readString(child, arg);
-                fprintf(stderr, "\"%s\"", strval);
+                if (show) fprintf(stderr, "\"%s\"", strval);
                 free(strval);
                 goto done;
             }
@@ -256,7 +257,7 @@ void printSyscallArgs(pid_t child, int num)
             if (i == 1)
             {
                 strval = readString(child, arg);
-                fprintf(stderr, "\"%s\"", strval);
+                if (show) fprintf(stderr, "\"%s\"", strval);
                 free(strval);
                 goto done;
             }
@@ -266,7 +267,7 @@ void printSyscallArgs(pid_t child, int num)
             if (i == 2)
             {
                 strval = readString(child, arg);
-                fprintf(stderr, "\"%s\"", strval);
+                if (show) fprintf(stderr, "\"%s\"", strval);
                 free(strval);
                 goto done;
             }
@@ -276,15 +277,15 @@ void printSyscallArgs(pid_t child, int num)
         switch (type)
         {
         case ARG_INT:
-            fprintf(stderr, "%ld", arg);
+            if (show) fprintf(stderr, "%ld", arg);
             break;
         case ARG_STR:
             strval = readString(child, arg);
-            fprintf(stderr, "\"%s\"", strval);
+            if (show) fprintf(stderr, "\"%s\"", strval);
             free(strval);
             break;
         default:
-            fprintf(stderr, "0x%lx", arg);
+            if (show) fprintf(stderr, "0x%lx", arg);
             break;
         }
 
@@ -292,7 +293,7 @@ void printSyscallArgs(pid_t child, int num)
 
         if (i != nargs - 1)     /* if not parameter */
         {
-            fprintf(stderr, ", ");
+            if (show) fprintf(stderr, ", ");
         }
     }
 }
@@ -314,7 +315,7 @@ void printSyscall(pid_t child, long syscall_num, long retval)
 void handleSyscall(pid_t child,
                    Trace& trace)
 {
-    const bool show = true;
+    const bool show = false;
     long syscall_num;                    // syscall number
     syscall_num = getReg(child, orig_eax);
     assert(errno == 0);
