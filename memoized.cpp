@@ -199,7 +199,6 @@ void printSyscallArgs(pid_t child, int num)
     struct syscall_entry *ent = NULL;
     int nargs = SYSCALL_MAXARGS;
     int i;
-    char *strval;
     const bool show = false;
 
     if (num <= MAX_SYSCALL_NUM && syscalls[num].name)
@@ -216,7 +215,7 @@ void printSyscallArgs(pid_t child, int num)
         {
             if (i == 0)
             {
-                strval = readString(child, arg);
+                char* strval = readString(child, arg);
                 if (show) fprintf(stderr, "\"%s\"", strval);
                 free(strval);
                 goto done;
@@ -241,7 +240,7 @@ void printSyscallArgs(pid_t child, int num)
         {
             if (i == 0)
             {
-                strval = readString(child, arg);
+                char* strval = readString(child, arg);
                 if (show) fprintf(stderr, "\"%s\"", strval);
                 free(strval);
                 goto done;
@@ -256,7 +255,7 @@ void printSyscallArgs(pid_t child, int num)
         {
             if (i == 1)
             {
-                strval = readString(child, arg);
+                char* strval = readString(child, arg);
                 if (show) fprintf(stderr, "\"%s\"", strval);
                 free(strval);
                 goto done;
@@ -266,7 +265,7 @@ void printSyscallArgs(pid_t child, int num)
         {
             if (i == 2)
             {
-                strval = readString(child, arg);
+                char* strval = readString(child, arg);
                 if (show) fprintf(stderr, "\"%s\"", strval);
                 free(strval);
                 goto done;
@@ -277,16 +276,22 @@ void printSyscallArgs(pid_t child, int num)
         switch (type)
         {
         case ARG_INT:
+        {
             if (show) fprintf(stderr, "%ld", arg);
             break;
+        }
         case ARG_STR:
-            strval = readString(child, arg);
+        {
+            char* strval = readString(child, arg);
             if (show) fprintf(stderr, "\"%s\"", strval);
             free(strval);
             break;
+        }
         default:
+        {
             if (show) fprintf(stderr, "0x%lx", arg);
             break;
+        }
         }
 
         done:
