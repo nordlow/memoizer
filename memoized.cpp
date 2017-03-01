@@ -319,6 +319,11 @@ void printSyscall(pid_t child, long syscall_num, long retval)
     fprintf(stderr, "%ld", retval);
 }
 
+bool isAbsolutePath(const std::string& path)
+{
+    return !path.empty() && path[0] == '/';
+}
+
 void handleSyscall(pid_t child,
                    Trace& trace)
 {
@@ -352,7 +357,7 @@ void handleSyscall(pid_t child,
                 std::string path = pathC;
                 free(pathC);    // TODO prevent deallocation
 
-                const bool isAbsolute = !path.empty() && path[0] == '/';
+                const bool isAbsoluteOpen = isAbsolutePath(path);
 
                 trace.doneSyscalls[syscall_num].push_back(path);
 
