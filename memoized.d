@@ -21,7 +21,7 @@
 
 // system calls
 import syscalls;
-#include "syscallents.h"
+import syscallsents;
 
 /* cheap trick for reading syscall number / return value. */
 #ifdef __amd64__
