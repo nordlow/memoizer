@@ -21,3 +21,9 @@ Enables
 - safe parallelization
 - immutable persistent storage of inputs and outputs
 - detect cyclic dependencies (inputs same as outputs)
+
+Planned Features
+================
+
+- `--assert-only-reads-from=DIRS`
+- `--assert-only-writes-to=DIRS`
