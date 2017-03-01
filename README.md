@@ -25,7 +25,7 @@ Enables
 Planned Features
 ================
 
-Assert that read and writes from specific set of directories:
+Assert read and writes from specific set of directories:
 
 - `--only-reads-from=DIRS`
 - `--only-writes-to=DIRS`
