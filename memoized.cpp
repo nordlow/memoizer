@@ -316,8 +316,7 @@ void handleSyscall(pid_t child,
                    Trace& trace)
 {
     const bool show = false;
-    long syscall_num;                    // syscall number
-    syscall_num = getReg(child, orig_eax);
+    const long syscall_num = getReg(child, orig_eax);
     assert(errno == 0);
 
     // return value
