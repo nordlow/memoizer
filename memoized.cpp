@@ -42,6 +42,8 @@
 
 #define getReg(child, name) __get_reg(child, offsetof(struct user, regs.name))
 
+const bool show = true;
+
 long __get_reg(pid_t child, int off)
 {
     long val = ptrace(PTRACE_PEEKUSER, child, off);
@@ -200,7 +202,6 @@ void printSyscallArgs(pid_t child, int num)
     struct syscall_entry *ent = NULL;
     int nargs = SYSCALL_MAXARGS;
     int i;
-    const bool show = false;
 
     if (num <= MAX_SYSCALL_NUM && syscalls[num].name)
     {
@@ -321,7 +322,6 @@ void printSyscall(pid_t child, long syscall_num, long retval)
 void handleSyscall(pid_t child,
                    Trace& trace)
 {
-    const bool show = false;
     const long syscall_num = getReg(child, orig_eax);
     assert(errno == 0);
 
@@ -370,17 +370,16 @@ void handleSyscall(pid_t child,
                     const time_t mtime = stat.st_mtime; // modification
                     const time_t atime = stat.st_atime; // access
 
-                    if (ctime)
+                    if (show)
                     {
-                        if (show) { fprintf(stderr, " ctime:%lu", ctime); }
-                    }
-                    if (mtime)
-                    {
-                        if (show) { fprintf(stderr, " mtime:%lu", mtime); }
-                    }
-                    if (atime)
-                    {
-                        if (show) { fprintf(stderr, " atime:%lu", atime); }
+                        if (ctime)
+                        {
+                            fprintf(stderr, " ctime:%lu", ctime);
+                        }
+                        if (mtime)
+                        {
+                            fprintf(stderr, " mtime:%lu", mtime);
+                        }
                     }
 
                     break;
