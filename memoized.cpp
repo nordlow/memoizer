@@ -64,9 +64,9 @@ struct Trace
 {
     DoneSyscalls doneSyscalls;
 
-    /// Read-only opened file paths by pid.
+    /// Read-only opened file paths by process id (pid_t).
     PathsByPid inPathsByPid;
-    /// Write-only opened file paths by pid.
+    /// Write-only opened file paths by process id (pid_t).
     PathsByPid outPathsByPid;
     /// Stated file paths by pid.
     PathsByPid statPathsByPid;
