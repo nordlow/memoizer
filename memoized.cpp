@@ -587,7 +587,7 @@ int ptraceTopChild(pid_t top_child, Trace& trace)
     }
 }
 
-void attachAndPtraceTopChild(pid_t top_child)
+void attachAndPtraceTopChild(pid_t top_child, Trace& trace)
 {
     const long traceRetVal = ptrace(PTRACE_ATTACH, top_child, NULL, NULL);
     if (traceRetVal == 0)             // success
@@ -606,8 +606,6 @@ void attachAndPtraceTopChild(pid_t top_child)
                       PTRACE_O_TRACEVFORK |
                       PTRACE_O_TRACEVFORKDONE);
     ptrace(PTRACE_SETOPTIONS, top_child, NULL, opt);
-
-    Trace trace;
 
     ptraceTopChild(top_child, trace);
 }
@@ -675,7 +673,8 @@ int main(int argc, char **argv)
     }
     else                        /* in the parent */
     {
-        attachAndPtraceTopChild(child);
+        Trace trace;
+        attachAndPtraceTopChild(child, trace);
     }
 }
 
