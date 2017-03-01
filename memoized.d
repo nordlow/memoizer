@@ -1,26 +1,26 @@
-#include <sys/ptrace.h>
-#include <bits/types.h>
-#include <sys/user.h>
-#include <sys/wait.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <syscall.h>
+// #include <sys/ptrace.h>
+// #include <bits/types.h>
+// #include <sys/user.h>
+// #include <sys/wait.h>
+// #include <sys/types.h>
+// #include <sys/stat.h>
+// #include <fcntl.h>
+// #include <syscall.h>
 
 // C library
-#include <unistd.h>
-#include <cstdlib>
-#include <cstdio>
-#include <cerrno>
-#include <cassert>
-#include <cstring>
-#include <cinttypes>
+// #include <unistd.h>
+// #include <cstdlib>
+// #include <cstdio>
+// #include <cerrno>
+// #include <cassert>
+// #include <cstring>
+// #include <cinttypes>
 
 // OpenSSL
-#include <openssl/sha.h>
+// #include <openssl/sha.h>
 
 // system calls
-#include "syscalls.h"
+import syscalls;
 #include "syscallents.h"
 
 /* cheap trick for reading syscall number / return value. */
