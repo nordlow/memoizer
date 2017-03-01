@@ -4,6 +4,7 @@ import sys
 import re
 import subprocess
 
+
 def do_syscall_numbers(unistd_h):
     syscalls = {}
     for line in open(unistd_h):
@@ -14,6 +15,7 @@ def do_syscall_numbers(unistd_h):
             syscalls[number] = name
 
     return syscalls
+
 
 def process_define(syscalls, text):
     (name, types) = None, None
@@ -36,6 +38,7 @@ def process_define(syscalls, text):
         else:
             types = []
     syscalls[name] = types
+
 
 def find_args(linux):
     syscalls = {}
@@ -62,6 +65,7 @@ def find_args(linux):
                     text += " "
     return syscalls
 
+
 def parse_type(t):
     if re.search(r'^(const\s*)?char\s*(__user\s*)?\*\s*$', t):
         return "ARG_STR"
@@ -69,11 +73,13 @@ def parse_type(t):
         return "ARG_PTR"
     return "ARG_INT"
 
-def write_output(syscalls_h, types, numbers):
+
+def write_output_C(syscalls_h, types, numbers):
     out = open(syscalls_h, 'w')
 
-    print >>out, "#define MAX_SYSCALL_NUM %d" % (max(numbers.keys()),)
-    print >>out, "struct syscall_entry syscalls[] = {"
+    print >> out, "#define MAX_SYSCALL_NUM %d" % (max(numbers.keys()),)
+    print >> out, "struct syscall_entry syscalls[] = {"
+
     for num in sorted(numbers.keys()):
         name = numbers[num]
         if name in types:
@@ -81,15 +87,42 @@ def write_output(syscalls_h, types, numbers):
         else:
             args = ["void*"] * 6
 
-        print >>out, "  [%d] = {" % (num,)
-        print >>out, "    .name  = \"%s\"," % (name,)
-        print >>out, "    .nargs = %d," % (len(args,))
+        print >> out, "  [%d] = {" % (num,)
+        print >> out, "    .name  = \"%s\"," % (name,)
+        print >> out, "    .nargs = %d," % (len(args,))
         out.write(   "    .args  = {")
         out.write(", ".join([parse_type(t) for t in args] + ["-1"] * (6 - len(args))))
         out.write("}},\n");
 
-    print >>out, "};"
+    print >> out, "};"
+
     out.close()
+
+
+def write_output_D(syscalls_h, types, numbers):
+    out = open(syscalls_h, 'w')
+
+    print >> out, "enum MAX_SYSCALL_NUM = %d;\n" % (max(numbers.keys()),)
+    print >> out, "struct syscall_entry[] syscalls =\n{"
+
+    for num in sorted(numbers.keys()):
+        name = numbers[num]
+        if name in types:
+            args = types[name]
+        else:
+            args = ["void*"] * 6
+
+        print >> out, "  [%d] = {" % (num,)
+        print >> out, "    .name  = \"%s\"," % (name,)
+        print >> out, "    .nargs = %d," % (len(args,))
+        out.write(   "    .args  = {")
+        out.write(", ".join([parse_type(t) for t in args] + ["-1"] * (6 - len(args))))
+        out.write("}},\n");
+
+    print >> out, "};"
+
+    out.close()
+
 
 def main(args):
     if not args:
@@ -104,7 +137,9 @@ def main(args):
     syscall_numbers = do_syscall_numbers(os.path.join(linux_dir, unistd_h))
     syscall_types = find_args(linux_dir)
 
-    write_output('syscallents.h', syscall_types, syscall_numbers)
+    write_output_C('syscallents.h', syscall_types, syscall_numbers)
+    write_output_D('syscallents.d', syscall_types, syscall_numbers)
+
 
 if __name__ == '__main__':
     sys.exit(main(sys.argv[1:]))
