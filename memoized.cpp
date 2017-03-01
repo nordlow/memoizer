@@ -352,6 +352,8 @@ void handleSyscall(pid_t child,
                 std::string path = pathC;
                 free(pathC);    // TODO prevent deallocation
 
+                const bool isAbsolute = path[0] == '/';
+
                 trace.doneSyscalls[syscall_num].push_back(path);
 
                 if (show)
