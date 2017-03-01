@@ -1,7 +1,7 @@
 #define SYSCALL_MAXARGS 6
 
 enum argtype
-  {
+{
     ARG_INT,
     ARG_PTR,
     ARG_STR
