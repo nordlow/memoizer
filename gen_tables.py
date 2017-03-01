@@ -102,7 +102,8 @@ def main(args):
         unistd_h = "unistd_32.h"
 
     syscall_numbers = do_syscall_numbers(os.path.join(linux_dir, unistd_h))
-    syscall_types   = find_args(linux_dir)
+    syscall_types = find_args(linux_dir)
+
     write_output('syscallents.h', syscall_types, syscall_numbers)
 
 if __name__ == '__main__':

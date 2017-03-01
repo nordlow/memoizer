@@ -204,7 +204,7 @@ void printSyscallArgs(pid_t child, int num)
     for (i = 0; i < nargs; i++) // incorrectly always 6
     {
         const ulong arg = pidSyscallArg(child, i);
-        const int type = ent ? ent->args[i] : ARG_PTR;
+        const int type = ent ? ent->args[i] : Arg.PTR;
 
         if (strcmp(sname, "execve") == 0)
         {
@@ -270,12 +270,12 @@ void printSyscallArgs(pid_t child, int num)
         // generic printing
         switch (type)
         {
-        case ARG_INT:
+        case Arg.INT:
         {
             if (show) fprintf(stderr, "%ld", arg);
             break;
         }
-        case ARG_STR:
+        case Arg.STR:
         {
             char* strval = readString(child, arg);
             if (show) fprintf(stderr, "\"%s\"", strval);
