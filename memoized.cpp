@@ -42,6 +42,8 @@
 
 #define getReg(child, name) __get_reg(child, offsetof(struct user, regs.name))
 
+#define MAXPATH (4096)
+
 const bool show = true;
 
 long __get_reg(pid_t child, int off)
@@ -322,6 +324,18 @@ void printSyscall(pid_t child, long syscall_num, long retval)
 bool isAbsolutePath(const std::string& path)
 {
     return !path.empty() && path[0] == '/';
+}
+
+/// Create tree of cachce directories.
+bool assertCacheDirTree()
+{
+    std::string home = getenv("HOME");
+    const mode_t mode = 0777;
+    // Python os.makedirs()
+    mkdir((home + "/.cache").c_str(), mode);
+    mkdir((home + "/.cache/memoized").c_str(), mode);
+    mkdir((home + "/.cache/memoized/artifacts").c_str(), mode);
+    mkdir((home + "/.cache/memoized/calls").c_str(), mode);
 }
 
 void handleSyscall(pid_t child,
@@ -646,6 +660,7 @@ int main(int argc, char **argv)
         push = 3;
     }
 
+    assertCacheDirTree();
 
     child = fork();
     if (child == -1)            /* fork failed */
