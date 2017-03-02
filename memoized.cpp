@@ -55,27 +55,29 @@ long __get_reg(pid_t child, int off)
 
 typedef unsigned long ulong;
 
-typedef std::unordered_set<std::string> Paths;
+typedef std::string Path;
+typedef std::unordered_set<Path> Paths;
+typedef std::unordered_set<pid_t> Pids;
 
 /// System calls executed.
-typedef std::vector<std::string> DoneSyscalls[MAX_SYSCALL_NUM + 1];
+typedef std::vector<Path> DoneSyscalls[MAX_SYSCALL_NUM + 1];
 
 /// Paths by pid.
-typedef std::map<pid_t, Paths> PathsByPid;
+typedef std::map<Path, Pids> PidsByPath;
 
 /// Trace results.
 struct Trace
 {
-    std::string homePath;
+    Path homePath;
 
     DoneSyscalls doneSyscalls;
 
     /// Read-only opened file paths by process id (pid_t).
-    PathsByPid inPathsByPid;
+    PidsByPath inPidsByPath;
     /// Write-only opened file paths by process id (pid_t).
-    PathsByPid outPathsByPid;
+    PidsByPath outPidsByPath;
     /// Stated file paths by pid.
-    PathsByPid statPathsByPid;
+    PidsByPath statPidsByPath;
 
     SHA256_CTX inputHash;
 };
@@ -323,7 +325,7 @@ void printSyscall(pid_t child, long syscall_num, long retval)
     fprintf(stderr, "%ld", retval);
 }
 
-bool isAbsolutePath(const std::string& path)
+bool isAbsolutePath(const Path& path)
 {
     return !path.empty() && path[0] == '/';
 }
@@ -368,7 +370,7 @@ void handleSyscall(pid_t child, Trace& trace)
             {
                 // TODO prevent allocation
                 char* const pathC = readString(child, pidSyscallArg(child, 0)); // TODO prevent allocation
-                std::string path = pathC;
+                Path path = pathC;
                 free(pathC);    // TODO prevent deallocation
 
                 const bool isAbsoluteOpen = isAbsolutePath(path);
@@ -430,12 +432,12 @@ void handleSyscall(pid_t child, Trace& trace)
 
                     if (read_flag)
                     {
-                        trace.inPathsByPid[child].insert(std::string(path));
+                        trace.inPidsByPath[Path(path)].insert(child);
                     }
 
                     if (write_flag)
                     {
-                        trace.outPathsByPid[child].insert(std::string(path));
+                        trace.outPidsByPath[Path(path)].insert(child);
                     }
 
                     if (show)
@@ -685,34 +687,28 @@ int main(int argc, char **argv)
         attachAndPtraceTopChild(child, trace);
 
         // post process
-        const std::string call_file = (trace.homePath + "/.cache/memoized/calls/first.yaml");
+        const Path call_file = (trace.homePath + "/.cache/memoized/calls/first.yaml");
         FILE* fi = fopen(call_file.c_str(), "wb");
 
         const char* indentation = "    ";
 
         fprintf(fi, "inputs:\n");
-        for (auto const & ent : trace.inPathsByPid)
+        for (auto const & ent : trace.inPidsByPath)
         {
-            // const pid_t pid = ent.first;
-            for (auto const & path : ent.second)
+            const Path& path = ent.first;
+            if (!startsWith(path, "/tmp/"))
             {
-                if (!startsWith(path, "/tmp/"))
-                {
-                    fprintf(fi, "%s%s\n", indentation, path.c_str());
-                }
+                fprintf(fi, "%s%s\n", indentation, path.c_str());
             }
         }
 
         fprintf(fi, "outputs:\n");
-        for (auto const & ent : trace.outPathsByPid)
+        for (auto const & ent : trace.outPidsByPath)
         {
-            // const pid_t pid = ent.first;
-            for (auto const & path : ent.second)
+            const Path& path = ent.first;
+            if (!startsWith(path, "/tmp/"))
             {
-                if (!startsWith(path, "/tmp/"))
-                {
-                    fprintf(fi, "%s%s\n", indentation, path.c_str());
-                }
+                fprintf(fi, "%s%s\n", indentation, path.c_str());
             }
         }
 
