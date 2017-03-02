@@ -410,10 +410,11 @@ void handleSyscall(pid_t child, Trace& trace)
                     const auto mode = pidSyscallArg(child, 2);
 
                     // true if this open only reads from file
-                    const bool read_flag = ((flags & (O_RDONLY)) ||
-                                            (flags & (O_CLOEXEC)) ||
-                                            (flags & (O_NOCTTY)) ||
-                                            (flags == 0)) && (!(flags & O_TRUNC));
+                    const bool read_flag = (((flags & (O_RDONLY)) ||
+                                             (flags & (O_CLOEXEC)) ||
+                                             (flags & (O_NOCTTY)) ||
+                                             (flags == 0)) &&
+                                            (!(flags & O_TRUNC)));
 
                     // true if this open only writes to file
                     const bool write_flag = ((flags & (O_WRONLY)) ||
