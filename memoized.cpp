@@ -618,7 +618,7 @@ bool startsWith(const std::string& whole, const char* part)
     return whole.find(part) == 0;
 }
 
-bool isReleventPath(const Path& path)
+bool isReleventDependencyPath(const Path& path)
 {
     return ((!startsWith(path, "/tmp/")) &&
             (!startsWith(path, "/dev/urandom")));
@@ -702,7 +702,7 @@ int main(int argc, char **argv)
         for (auto const & ent : trace.inPidsByPath)
         {
             const Path& path = ent.first;
-            if (isReleventPath(path))
+            if (isReleventDependencyPath(path))
             {
                 fprintf(fi, "%s%s\n", indentation, path.c_str());
             }
@@ -712,7 +712,7 @@ int main(int argc, char **argv)
         for (auto const & ent : trace.outPidsByPath)
         {
             const Path& path = ent.first;
-            if (isReleventPath(path))
+            if (isReleventDependencyPath(path))
             {
                 fprintf(fi, "%s%s\n", indentation, path.c_str());
             }
