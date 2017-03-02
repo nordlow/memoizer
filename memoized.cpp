@@ -7,7 +7,6 @@
 #include <fcntl.h>
 #include <syscall.h>
 
-
 // C library
 #include <unistd.h>
 #include <cstdlib>
@@ -24,6 +23,7 @@
 #include <vector>
 #include <string>
 #include <map>
+#include <unordered_set>
 
 // system calls
 #include "syscalls.h"
@@ -55,7 +55,7 @@ long __get_reg(pid_t child, int off)
 
 typedef unsigned long ulong;
 
-typedef std::vector<std::string> Paths;
+typedef std::unordered_set<std::string> Paths;
 
 /// System calls executed.
 typedef std::vector<std::string> DoneSyscalls[MAX_SYSCALL_NUM + 1];
@@ -429,12 +429,12 @@ void handleSyscall(pid_t child, Trace& trace)
 
                     if (read_flag)
                     {
-                        trace.inPathsByPid[child].push_back(std::string(path));
+                        trace.inPathsByPid[child].insert(std::string(path));
                     }
 
                     if (write_flag)
                     {
-                        trace.outPathsByPid[child].push_back(std::string(path));
+                        trace.outPathsByPid[child].insert(std::string(path));
                     }
 
                     if (show)
@@ -610,6 +610,11 @@ void attachAndPtraceTopChild(pid_t top_child, Trace& trace)
     ptraceTopChild(top_child, trace);
 }
 
+bool startsWith(const std::string& whole, const char* part)
+{
+    return whole.find(part) == 0;
+}
+
 int main(int argc, char **argv)
 {
     pid_t child;
@@ -690,7 +695,7 @@ int main(int argc, char **argv)
             // const pid_t pid = ent.first;
             for (auto const & path : ent.second)
             {
-                if (path.find("/tmp/") != 0)
+                if (!startsWith(path, "/tmp/"))
                 {
                     fprintf(fi, "%s%s\n", indentation, path.c_str());
                 }
@@ -703,7 +708,7 @@ int main(int argc, char **argv)
             // const pid_t pid = ent.first;
             for (auto const & path : ent.second)
             {
-                if (path.find("/tmp/") != 0)
+                if (!startsWith(path, "/tmp/"))
                 {
                     fprintf(fi, "%s%s\n", indentation, path.c_str());
                 }
