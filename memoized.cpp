@@ -73,11 +73,11 @@ struct Trace
     DoneSyscalls doneSyscalls;
 
     /// Read-only opened file paths by process id (pid_t).
-    PidsByPath inPidsByPath;
+    PidsByPath pidsByReadPath;
     /// Write-only opened file paths by process id (pid_t).
-    PidsByPath outPidsByPath;
+    PidsByPath pidsByWritePath;
     /// Stated file paths by pid.
-    PidsByPath statPidsByPath;
+    PidsByPath pidsByStatPath;
 
     SHA256_CTX inputHash;
 };
@@ -432,12 +432,12 @@ void handleSyscall(pid_t child, Trace& trace)
 
                     if (read_flag)
                     {
-                        trace.inPidsByPath[Path(path)].insert(child);
+                        trace.pidsByReadPath[Path(path)].insert(child);
                     }
 
                     if (write_flag)
                     {
-                        trace.outPidsByPath[Path(path)].insert(child);
+                        trace.pidsByWritePath[Path(path)].insert(child);
                     }
 
                     if (show)
@@ -698,23 +698,29 @@ int main(int argc, char **argv)
 
         const char* indentation = "    ";
 
-        fprintf(fi, "inputs:\n");
-        for (auto const & ent : trace.inPidsByPath)
+        if (!trace.pidsByWritePath.empty())
         {
-            const Path& path = ent.first;
-            if (isHashableFilePath(path))
+            fprintf(fi, "writes:\n");
+            for (auto const & ent : trace.pidsByWritePath)
             {
-                fprintf(fi, "%s%s\n", indentation, path.c_str());
+                const Path& path = ent.first;
+                if (isHashableFilePath(path))
+                {
+                    fprintf(fi, "%s%s\n", indentation, path.c_str());
+                }
             }
         }
 
-        fprintf(fi, "outputs:\n");
-        for (auto const & ent : trace.outPidsByPath)
+        if (!trace.pidsByReadPath.empty())
         {
-            const Path& path = ent.first;
-            if (isHashableFilePath(path))
+            fprintf(fi, "reads:\n");
+            for (auto const & ent : trace.pidsByReadPath)
             {
-                fprintf(fi, "%s%s\n", indentation, path.c_str());
+                const Path& path = ent.first;
+                if (isHashableFilePath(path))
+                {
+                    fprintf(fi, "%s%s\n", indentation, path.c_str());
+                }
             }
         }
 
