@@ -66,6 +66,8 @@ typedef std::map<pid_t, Paths> PathsByPid;
 /// Trace results.
 struct Trace
 {
+    std::string homePath;
+
     DoneSyscalls doneSyscalls;
 
     /// Read-only opened file paths by process id (pid_t).
@@ -326,16 +328,15 @@ bool isAbsolutePath(const std::string& path)
     return !path.empty() && path[0] == '/';
 }
 
-/// Create tree of cachce directories.
-bool assertCacheDirTree()
+/// Create tree cache directories if it doesn't exist.
+bool assertCacheDirTree(Trace& trace)
 {
-    std::string home = getenv("HOME");
     const mode_t mode = 0777;
     // Python os.makedirs()
-    mkdir((home + "/.cache").c_str(), mode);
-    mkdir((home + "/.cache/memoized").c_str(), mode);
-    mkdir((home + "/.cache/memoized/artifacts").c_str(), mode);
-    mkdir((home + "/.cache/memoized/calls").c_str(), mode);
+    mkdir((trace.homePath + "/.cache").c_str(), mode);
+    mkdir((trace.homePath + "/.cache/memoized").c_str(), mode);
+    mkdir((trace.homePath + "/.cache/memoized/artifacts").c_str(), mode);
+    mkdir((trace.homePath + "/.cache/memoized/calls").c_str(), mode);
 }
 
 void handleSyscall(pid_t child, Trace& trace)
@@ -657,8 +658,6 @@ int main(int argc, char **argv)
         push = 3;
     }
 
-    assertCacheDirTree();
-
     child = fork();
     if (child == -1)            /* fork failed */
     {
@@ -673,7 +672,16 @@ int main(int argc, char **argv)
     else                        /* in the parent */
     {
         Trace trace;
+        trace.homePath = getenv("HOME");
+
+        assertCacheDirTree(trace);
+
         attachAndPtraceTopChild(child, trace);
+
+        // post process
+        const std::string call_file = (trace.homePath + "/.cache/memoized/calls/first");
+        FILE* f = fopen(call_file.c_str(), "wb");
+        fclose(f);
     }
 }
 
