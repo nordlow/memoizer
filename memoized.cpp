@@ -329,7 +329,7 @@ bool isAbsolutePath(const std::string& path)
 }
 
 /// Create tree cache directories if it doesn't exist.
-bool assertCacheDirTree(Trace& trace)
+void assertCacheDirTree(Trace& trace)
 {
     const mode_t mode = 0777;
     // Python os.makedirs()
@@ -679,9 +679,36 @@ int main(int argc, char **argv)
         attachAndPtraceTopChild(child, trace);
 
         // post process
-        const std::string call_file = (trace.homePath + "/.cache/memoized/calls/first");
-        FILE* f = fopen(call_file.c_str(), "wb");
-        fclose(f);
+        const std::string call_file = (trace.homePath + "/.cache/memoized/calls/first.conf");
+        FILE* fi = fopen(call_file.c_str(), "wb");
+
+        fprintf(fi, "inputs:\n");
+        for (auto const & ent : trace.inPathsByPid)
+        {
+            // const pid_t pid = ent.first;
+            for (auto const & path : ent.second)
+            {
+                if (path.find("/tmp/") != 0)
+                {
+                    fprintf(fi, "    %s\n", path.c_str());
+                }
+            }
+        }
+
+        fprintf(fi, "outputs:\n");
+        for (auto const & ent : trace.outPathsByPid)
+        {
+            // const pid_t pid = ent.first;
+            for (auto const & path : ent.second)
+            {
+                if (path.find("/tmp/") != 0)
+                {
+                    fprintf(fi, "    %s\n", path.c_str());
+                }
+            }
+        }
+
+        fclose(fi);
     }
 }
 
