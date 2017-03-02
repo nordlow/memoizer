@@ -413,7 +413,7 @@ void handleSyscall(pid_t child, Trace& trace)
                     const bool read_flag = ((flags & (O_RDONLY)) ||
                                             (flags & (O_CLOEXEC)) ||
                                             (flags & (O_NOCTTY)) ||
-                                            (flags == 0));
+                                            (flags == 0)) && (!(flags & O_TRUNC));
 
                     // true if this open only writes to file
                     const bool write_flag = ((flags & (O_WRONLY)) ||
