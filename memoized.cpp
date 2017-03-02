@@ -679,8 +679,10 @@ int main(int argc, char **argv)
         attachAndPtraceTopChild(child, trace);
 
         // post process
-        const std::string call_file = (trace.homePath + "/.cache/memoized/calls/first.conf");
+        const std::string call_file = (trace.homePath + "/.cache/memoized/calls/first.yaml");
         FILE* fi = fopen(call_file.c_str(), "wb");
+
+        const char* indentation = "    ";
 
         fprintf(fi, "inputs:\n");
         for (auto const & ent : trace.inPathsByPid)
@@ -690,7 +692,7 @@ int main(int argc, char **argv)
             {
                 if (path.find("/tmp/") != 0)
                 {
-                    fprintf(fi, "    %s\n", path.c_str());
+                    fprintf(fi, "%s%s\n", indentation, path.c_str());
                 }
             }
         }
@@ -703,7 +705,7 @@ int main(int argc, char **argv)
             {
                 if (path.find("/tmp/") != 0)
                 {
-                    fprintf(fi, "    %s\n", path.c_str());
+                    fprintf(fi, "%s%s\n", indentation, path.c_str());
                 }
             }
         }
