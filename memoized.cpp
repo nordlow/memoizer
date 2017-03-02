@@ -622,7 +622,7 @@ bool startsWith(const std::string& whole, const char* part)
 
 bool isHashableFilePath(const Path& path)
 {
-    return ((!startsWith(path, "/tmp/")) &&
+    return ((!startsWith(path, "/tmp")) &&
             (!startsWith(path, "/dev/urandom")));
 }
 
