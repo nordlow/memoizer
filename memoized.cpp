@@ -24,10 +24,15 @@
 #include <string>
 #include <map>
 #include <unordered_set>
+#include <algorithm>
 
 // system calls
 #include "syscalls.h"
 #include "syscallents.h"
+
+#ifndef PATH_MAX
+#include <sys/param.h>
+#endif
 
 /* cheap trick for reading syscall number / return value. */
 #ifdef __amd64__
@@ -42,9 +47,7 @@
 
 #define getReg(child, name) __get_reg(child, offsetof(struct user, regs.name))
 
-#define MAXPATH (4096)
-
-const bool show = true;
+const bool show = false;
 
 long __get_reg(pid_t child, int off)
 {
@@ -59,11 +62,35 @@ typedef std::string Path;
 typedef std::unordered_set<Path> Paths;
 typedef std::unordered_set<pid_t> Pids;
 
-/// System calls executed.
 typedef std::vector<Path> DoneSyscalls[MAX_SYSCALL_NUM + 1];
-
-/// Paths by pid.
 typedef std::map<Path, Pids> PidsByPath;
+typedef std::map<Path, timespec> TimespecByPath;
+
+bool operator < (const timespec& lhs,
+                 const timespec& rhs)
+{
+    if (lhs.tv_sec == rhs.tv_sec)
+    {
+        return lhs.tv_nsec < rhs.tv_nsec;
+    }
+    else
+    {
+        return lhs.tv_sec < rhs.tv_sec;
+    }
+}
+
+struct PidMtime
+{
+    PidMtime(pid_t pid_, struct timespec mtim_)
+    {
+        this->pid = pid_;
+        this->mtim = mtim_;
+    }
+    pid_t pid;
+    struct timespec mtim;
+};
+
+typedef std::vector<PidMtime> PidMtimes;
 
 /// Trace results.
 struct Trace
@@ -74,10 +101,14 @@ struct Trace
 
     /// Read-only opened file paths by process id (pid_t).
     PidsByPath pidsByReadPath;
+
     /// Write-only opened file paths by process id (pid_t).
     PidsByPath pidsByWritePath;
+
     /// Stated file paths by pid.
     PidsByPath pidsByStatPath;
+
+    TimespecByPath maxTimespecByStatPath;
 
     SHA256_CTX inputHash;
 };
@@ -151,27 +182,27 @@ char *readString(pid_t child, unsigned long addr)
 {
     uint allocated = 4096;
     char *val = reinterpret_cast<char*>(malloc(allocated));
-    int read = 0;
-    unsigned long tmp;
+    uint count = 0;
     while (true)
     {
-        if (read + sizeof(tmp) > allocated)
+        long tmp;
+        if (count + sizeof(tmp) > allocated)
         {
             allocated *= 2;
             val = reinterpret_cast<char*>(realloc(val, allocated));
         }
-        tmp = ptrace(PTRACE_PEEKDATA, child, addr + read);
+        tmp = ptrace(PTRACE_PEEKDATA, child, addr + count);
         if (errno != 0)
         {
-            val[read] = 0;
+            val[count] = 0;
             break;
         }
-        memcpy(val + read, &tmp, sizeof(tmp));
-        if (memchr(&tmp, 0, sizeof(tmp)) != NULL)
+        memcpy(val + count, &tmp, sizeof(tmp));
+        if (memchr(&tmp, 0, sizeof(tmp)) != NULL) // if null terminator ound
         {
             break;
         }
-        read += sizeof(tmp);
+        count += sizeof(tmp);
     }
     return val;
 }
@@ -181,25 +212,22 @@ char *readString(pid_t child, unsigned long addr)
  */
 struct stat readStat(pid_t child, unsigned long addr)
 {
-    struct stat stat;
-    uint8_t* statPtr = reinterpret_cast<uint8_t*>(&stat); // TODO byte
-    int read = 0;
-    while (true)
+    struct stat data;
+    uint8_t* statPtr = reinterpret_cast<uint8_t*>(&data); // TODO byte
+    assert(sizeof(data) % sizeof(long) == 0); // require even number of chunks for now
+    uint count = 0;
+    while (count < sizeof(data))
     {
-        unsigned long tmp = ptrace(PTRACE_PEEKDATA, child, addr + read);
+        const long tmp = ptrace(PTRACE_PEEKDATA, child, addr + count);
         if (errno != 0)
         {
             fprintf(stderr, "memoized: error: cannot read ptrace(PTRACE_PEEKDATA)\n");
             break;
         }
-        memcpy(statPtr + read, &tmp, sizeof(tmp));
-        if (memchr(&tmp, 0, sizeof(tmp)) != NULL)
-        {
-            break;
-        }
-        read += sizeof(tmp);
+        memcpy(statPtr + count, &tmp, sizeof(tmp));
+        count += sizeof(tmp);
     }
-    return stat;
+    return data;
 }
 
 void printSyscallArgs(pid_t child, int num)
@@ -341,6 +369,46 @@ void assertCacheDirTree(Trace& trace)
     mkdir((trace.homePath + "/.cache/memoized/calls").c_str(), mode);
 }
 
+/** Lookup path of file descriptor `fd` of process with pid `pid` and put into
+    `linkDestPath`.
+
+    See https://stackoverflow.com/questions/1188757
+*/
+ssize_t lookupPidFdPath(pid_t pid, int fd,
+                        char* linkDestPath, size_t linkDestPathBufSize) // out parameter
+{
+    char fdPath[64]; // actual maximum length is 37 for 64-bit system
+    snprintf(fdPath, sizeof(fdPath), "/proc/%d/%d", pid, fd);
+    const ssize_t ret = readlink(fdPath, linkDestPath, linkDestPathBufSize); // get path
+    if (ret < 0)
+    {
+        // fprintf(stderr, "memoized: error: failed to lookup pid:%d fd:%d fdPath:%s\n", pid, fd, fdPath);
+    }
+    return ret;
+}
+
+/** Lookup current working directory of process with pid `pid` and put into
+    `cwdPath`.
+
+    See https://stackoverflow.com/questions/1188757
+*/
+ssize_t lookupPidCwdPath(pid_t pid,
+                         char* cwdPath, size_t cwdPathBufSize) // out parameter
+{
+    char fdPath[64]; // actual maximum length is 37 for 64-bit system
+    snprintf(fdPath, sizeof(fdPath), "/proc/%d/cwd", pid);
+    const ssize_t ret = readlink(fdPath, cwdPath, cwdPathBufSize); // get path
+    if (ret < 0)
+    {
+        // fprintf(stderr, "memoized: error: failed to lookup cwd of pid:%d fdPath:%s\n", pid, fdPath);
+    }
+    else
+    {
+        // fprintf(stderr, " pid:%d cwdPath:%s\n", pid, cwdPath);
+    }
+    return ret;
+}
+
 void handleSyscall(pid_t child, Trace& trace)
 {
     const long syscall_num = getReg(child, orig_eax);
@@ -373,34 +441,60 @@ void handleSyscall(pid_t child, Trace& trace)
                 Path path = pathC;
                 free(pathC);    // TODO prevent deallocation
 
-                const bool isAbsoluteOpen = isAbsolutePath(path);
-
-                trace.doneSyscalls[syscall_num].push_back(path);
+                char cwdPath[PATH_MAX];
+                const ssize_t cwdRet = lookupPidCwdPath(child,
+                                                        cwdPath, sizeof(cwdPath));
 
                 if (show)
                 {
                     printSyscall(child, syscall_num, retval);
                 }
 
+                char linkDestPath[PATH_MAX];
+                if (syscall_num == SYS_open ||
+                    syscall_num == SYS_openat ||
+                    syscall_num == SYS_creat)
+                {
+                    const ssize_t fdRet = lookupPidFdPath(child,
+                                                          (int)retval, // to file descriptor
+                                                          linkDestPath, sizeof(linkDestPath));
+                    if (fdRet >= 0)
+                    {
+                        if (show)
+                        {
+                            fprintf(stderr, "%s is actually %s", path.c_str(), linkDestPath);
+                        }
+                    }
+                }
+
+                trace.doneSyscalls[syscall_num].push_back(path);
+
                 switch (syscall_num)
                 {
                 case SYS_stat:
                 case SYS_lstat: // TODO specialcase on lstat
                 {
+                    const struct stat stat = readStat(child, pidSyscallArg(child, 1));
+                    struct timespec mtime = stat.st_mtim; // modification time
+
                     trace.pidsByStatPath[Path(path)].insert(child);
 
-                    const struct stat stat = readStat(child, pidSyscallArg(child, 1));
-
-                    // const time_t ctime = stat.st_ctime; // creation
-                    // const time_t atime = stat.st_atime; // access
-                    const time_t mtime = stat.st_mtime; // modification
+                    auto hit = trace.maxTimespecByStatPath.find(Path(path));
+                    if (hit != trace.maxTimespecByStatPath.end()) // if hit
+                    {
+                        if (trace.maxTimespecByStatPath[Path(path)] < mtime) // if more recent
+                        {
+                            trace.maxTimespecByStatPath[Path(path)] = mtime; // store more recent
+                        }
+                    }
+                    else
+                    {
+                        trace.maxTimespecByStatPath[Path(path)] = mtime;
+                    }
 
                     if (show)
                     {
-                        if (mtime)
-                        {
-                            fprintf(stderr, " mtime:%lu", mtime);
-                        }
+                        fprintf(stderr, " st_mtime:%ld.%09ld", mtime.tv_sec, mtime.tv_nsec);
                     }
 
                     break;
@@ -490,6 +584,10 @@ void handleSyscall(pid_t child, Trace& trace)
                 // printSyscall(child, syscall_num, retval);
                 // endl(stderr);
                 // endl(stderr);
+            }
+            else if (syscall_num == SYS_fstat)
+            {
+                // fprintf(stderr, "TODO handle system call fstat()\n");
             }
             else
             {
@@ -627,7 +725,7 @@ bool isHashableFilePath(const Path& path)
             (!startsWith(path, "/dev/urandom")));
 }
 
-int main(int argc, char **argv)
+int main(int argc, char* argv[], char* envp[])
 {
     pid_t child;
     int push = 1;
@@ -695,11 +793,21 @@ int main(int argc, char **argv)
 
         attachAndPtraceTopChild(child, trace);
 
+        // TODO lookup argv[0] in path
+
+        // TODO calculate chash from `pwd` `argv` and 'env' used in child
+
         // post process
-        const Path call_file = (trace.homePath + "/.cache/memoized/calls/first.yaml");
+        const Path call_file = (trace.homePath + "/.cache/memoized/calls/first.txt");
         FILE* fi = fopen(call_file.c_str(), "wb");
 
         const char* indentation = "    ";
+
+        fprintf(fi, "call:\n");
+        for (int i = 0; i != argc; ++i)
+        {
+            fprintf(fi, "%s%s\n", indentation, argv[i]);
+        }
 
         if (!trace.pidsByWritePath.empty())
         {
@@ -735,77 +843,45 @@ int main(int argc, char **argv)
                 const Path& path = ent.first;
                 if (isHashableFilePath(path))
                 {
-                    fprintf(fi, "%s%s\n", indentation, path.c_str());
+                    fprintf(fi, "%s%s", indentation, path.c_str());
+                    auto hit = trace.maxTimespecByStatPath.find(Path(path));
+                    if (hit != trace.maxTimespecByStatPath.end()) // if hit
+                    {
+                        fprintf(fi,
+                                " %ld.%09ld",
+                                hit->second.tv_sec,
+                                hit->second.tv_nsec);
+                    }
+                    endl(fi);
                 }
+            }
+        }
+
+        const bool sortedEnv = true;
+
+        fprintf(fi, "environment:\n");
+        if (sortedEnv)
+        {
+            std::vector<std::string> env;
+            for (int i = 0; envp[i]; ++i)
+            {
+                env.push_back(envp[i]);
+            }
+            std::sort(env.begin(), env.end());
+
+            for (int i = 0; envp[i]; ++i)
+            {
+                fprintf(fi, "%s%s\n", indentation, env[i].c_str());
+            }
+        }
+        else
+        {
+            for (int i = 0; envp[i]; ++i)
+            {
+                fprintf(fi, "%s%s\n", indentation, envp[i]);
             }
         }
 
         fclose(fi);
     }
 }
-
-// int do_trace_top(pid_t root_child, int syscall_req)
-// {
-//     int status;
-//     int retval;
-
-//     waitpid(root_child, &status, 0);
-
-//     assert(WIFSTOPPED(status));
-
-//     ptrace(PTRACE_SETOPTIONS, root_child, 0,
-//            PTRACE_O_TRACESYSGOOD |
-//            PTRACE_O_EXITKILL |
-
-//            PTRACE_O_TRACECLONE |
-//            PTRACE_O_TRACEEXEC |
-//            PTRACE_O_TRACEFORK |
-//            PTRACE_O_TRACEVFORK |
-//            PTRACE_O_TRACEVFORKDONE
-//            );
-
-//     const uint max_childs = 4096;
-//     uint child_count = 0;
-//     pid_t childs[max_childs];
-
-//     childs[0] = root_child;
-//     child_count = 1;
-
-//     while (true)                /* TODO while children not empty */
-//     {
-//         for (uint childs_index = 0; childs_index != child_count; ++childs_index)
-//         {
-//             const pid_t child = childs[childs_index];
-//             if (false)
-//                 fprintf(stderr, "child:%d\n", child);
-
-//             if (waitForChildPidSyscall(child) != 0)
-//             {
-//                 goto done;      /* TODO remove child from list of children */
-//             }
-
-//             /* pre syscall */
-
-//             handleSyscall(child, syscall_req);
-//             fprintf(stderr, "\n");
-
-//             if (waitForChildPidSyscall(child) != 0)
-//             {
-//                 goto done;      /* TODO remove child from list of children */
-//             }
-
-//             /* post syscall */
-
-//             handleSyscall(child, syscall_req);
-
-//             retval = getReg(child, eax);
-//             assert(errno == 0);
-
-//             fprintf(stderr, "%d\n", retval);
-//         }
-//     }
-
-//  done:
-
-//     return 0;
-// }
