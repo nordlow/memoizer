@@ -387,6 +387,8 @@ void handleSyscall(pid_t child, Trace& trace)
                 case SYS_stat:
                 case SYS_lstat: // TODO specialcase on lstat
                 {
+                    trace.pidsByStatPath[Path(path)].insert(child);
+
                     const struct stat stat = readStat(child, pidSyscallArg(child, 1));
 
                     // const time_t ctime = stat.st_ctime; // creation
@@ -715,6 +717,19 @@ int main(int argc, char **argv)
         {
             fprintf(fi, "reads:\n");
             for (auto const & ent : trace.pidsByReadPath)
+            {
+                const Path& path = ent.first;
+                if (isHashableFilePath(path))
+                {
+                    fprintf(fi, "%s%s\n", indentation, path.c_str());
+                }
+            }
+        }
+
+        if (!trace.pidsByStatPath.empty())
+        {
+            fprintf(fi, "stats:\n");
+            for (auto const & ent : trace.pidsByStatPath)
             {
                 const Path& path = ent.first;
                 if (isHashableFilePath(path))
