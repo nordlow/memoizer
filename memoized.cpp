@@ -696,7 +696,7 @@ int main(int argc, char **argv)
         const Path call_file = (trace.homePath + "/.cache/memoized/calls/first.yaml");
         FILE* fi = fopen(call_file.c_str(), "wb");
 
-        const char* indentation = "    ";
+        const char* indentation = "\t";
 
         if (!trace.pidsByWritePath.empty())
         {
