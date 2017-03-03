@@ -207,6 +207,15 @@ char *readString(pid_t child, unsigned long addr)
     return val;
 }
 
+Path readCxxString(pid_t child, unsigned long addr)
+{
+    // TODO prevent allocation
+    char* const pathC = readString(child, pidSyscallArg(child, 0)); // TODO prevent allocation
+    Path path = pathC;
+    free(pathC);
+    return path;
+}
+
 /** Allocate and return a copy of a null-terminated C string at `addr`.
     TODO templatize T on struct stat when moving to D
  */
@@ -436,10 +445,7 @@ void handleSyscall(pid_t child, Trace& trace)
                 syscall_num == SYS_lstat ||
                 syscall_num == SYS_access) // file system syscalls with path as first argument
             {
-                // TODO prevent allocation
-                char* const pathC = readString(child, pidSyscallArg(child, 0)); // TODO prevent allocation
-                Path path = pathC;
-                free(pathC);    // TODO prevent deallocation
+                const Path path = readCxxString(child, pidSyscallArg(child, 0)); // TODO prevent allocation
 
                 char cwdPath[PATH_MAX];
                 const ssize_t cwdRet = lookupPidCwdPath(child,
@@ -588,6 +594,10 @@ void handleSyscall(pid_t child, Trace& trace)
             else if (syscall_num == SYS_fstat)
             {
                 // fprintf(stderr, "TODO handle system call fstat()\n");
+            }
+            else if (syscall_num == SYS_getcwd)
+            {
+                fprintf(stderr, "TODO handle system call getcwd()\n");
             }
             else
             {
@@ -793,8 +803,9 @@ int main(int argc, char* argv[], char* envp[])
 
         attachAndPtraceTopChild(child, trace);
 
-        char cwd[PATH_MAX];
-        getcwd(cwd, PATH_MAX);
+        char cwdBuf[PATH_MAX];
+        const char* cwd = getcwd(cwdBuf, PATH_MAX);
+        assert(cwd);
 
         // TODO lookup argv[0] in path
 
