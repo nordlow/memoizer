@@ -415,7 +415,7 @@ ssize_t lookupPidCwdPath(pid_t pid,
     const ssize_t ret = readlink(fdPath, cwdPath, cwdPathBufSize); // get path
     if (ret < 0)
     {
-        // fprintf(stderr, "memoized: error: failed to lookup cwd of pid:%d fdPath:%s\n", pid, fdPath);
+        fprintf(stderr, "memoized: error: failed to lookup cwd of pid:%d fdPath:%s\n", pid, fdPath);
     }
     else
     {
