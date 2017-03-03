@@ -20,10 +20,10 @@ int main(int argc, const char * argv[], const char * envp[])
     struct stat st;
     assert(stat("passwd", &st) == 0);
 
-    printf("All ok!\n");
-
-    const int fd = open("passwd", 0777);
+    const int fd = open("passwd", O_RDONLY);
     assert(fd);
+
+    printf("All ok!\n");
 
     return 0;
 }
