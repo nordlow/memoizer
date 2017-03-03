@@ -47,7 +47,7 @@
 
 #define getReg(child, name) __get_reg(child, offsetof(struct user, regs.name))
 
-const bool show = false;
+const bool show = true;
 
 long __get_reg(pid_t child, int off)
 {
