@@ -1,4 +1,8 @@
-// TODO add check for non-existing PROGRAM in call: ./memoized PROGRAM, for instance when `foo` is given when `./foo` should be given
+// TODO add check for non-existing PROGRAM in call: ./memoized PROGRAM, for
+// instance when `foo` is given when `./foo` should be given
+
+// TODO open(),stat(), ...: print if path is not absolute print as: REL_PATH @
+// CWD, where CWD is looked up from cwdPathByPid[child]
 
 #include <sys/ptrace.h>
 #include <bits/types.h>
