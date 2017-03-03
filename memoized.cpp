@@ -605,7 +605,6 @@ void handleSyscall(pid_t child, Trace& trace)
             {
                 const Path path = readCxxString(child, pidSyscallArg(child, 0)); // TODO prevent allocation
                 trace.cwdPathByPid[child] = path; // store current cwd
-                // fprintf(stderr, "memoized: TODO handle chdir(%s)\n", path.c_str());
             }
             else if (syscall_num == SYS_getcwd)
             {
