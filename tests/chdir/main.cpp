@@ -22,7 +22,7 @@ int main(int argc, const char * argv[], const char * envp[])
 
     printf("All ok!\n");
 
-    int fd = open("passwd", 0777);
+    const int fd = open("passwd", 0777);
     assert(fd);
 
     return 0;
