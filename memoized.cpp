@@ -597,7 +597,8 @@ void handleSyscall(pid_t child, Trace& trace)
             }
             else if (syscall_num == SYS_getcwd)
             {
-                fprintf(stderr, "TODO handle system call getcwd()\n");
+                const Path path = readCxxString(child, pidSyscallArg(child, 0)); // TODO prevent allocation
+                fprintf(stderr, "memoized: TODO handle getcwd(%s)\n", path.c_str());
             }
             else
             {
