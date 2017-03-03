@@ -793,6 +793,9 @@ int main(int argc, char* argv[], char* envp[])
 
         attachAndPtraceTopChild(child, trace);
 
+        char cwd[PATH_MAX];
+        getcwd(cwd, PATH_MAX);
+
         // TODO lookup argv[0] in path
 
         // TODO calculate chash from `pwd` `argv` and 'env' used in child
@@ -808,6 +811,8 @@ int main(int argc, char* argv[], char* envp[])
         {
             fprintf(fi, "%s%s\n", indentation, argv[i]);
         }
+
+        fprintf(fi, "cwd: %s\n", cwd);
 
         if (!trace.pidsByWritePath.empty())
         {
