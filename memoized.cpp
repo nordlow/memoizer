@@ -184,7 +184,7 @@ ulong pidSyscallArg(pid_t child, int which)
 }
 
 /** Allocate and return a copy of a null-terminated C string at `addr`. */
-char *readString(pid_t child, unsigned long addr)
+char *readCString(pid_t child, unsigned long addr)
 {
     uint allocated = 4096;
     char *val = reinterpret_cast<char*>(malloc(allocated));
@@ -216,7 +216,7 @@ char *readString(pid_t child, unsigned long addr)
 Path readCxxString(pid_t child, unsigned long addr)
 {
     // TODO prevent allocation by reading directy into preallocated std::string
-    char* const pathC = readString(child, addr);
+    char* const pathC = readCString(child, addr);
     Path path = pathC;
     free(pathC);
     return path;
@@ -266,7 +266,7 @@ void printSyscallArgs(pid_t child, int num)
         {
             if (i == 0)
             {
-                char* strval = readString(child, arg);
+                char* strval = readCString(child, arg);
                 if (show) fprintf(stderr, "\"%s\"", strval);
                 free(strval);
                 goto done;
@@ -291,7 +291,7 @@ void printSyscallArgs(pid_t child, int num)
         {
             if (i == 0)
             {
-                char* strval = readString(child, arg);
+                char* strval = readCString(child, arg);
                 if (show) fprintf(stderr, "\"%s\"", strval);
                 free(strval);
                 goto done;
@@ -306,7 +306,7 @@ void printSyscallArgs(pid_t child, int num)
         {
             if (i == 1)
             {
-                char* strval = readString(child, arg);
+                char* strval = readCString(child, arg);
                 if (show) fprintf(stderr, "\"%s\"", strval);
                 free(strval);
                 goto done;
@@ -316,7 +316,7 @@ void printSyscallArgs(pid_t child, int num)
         {
             if (i == 2)
             {
-                char* strval = readString(child, arg);
+                char* strval = readCString(child, arg);
                 if (show) fprintf(stderr, "\"%s\"", strval);
                 free(strval);
                 goto done;
@@ -333,7 +333,7 @@ void printSyscallArgs(pid_t child, int num)
         }
         case ARG_STR:
         {
-            char* strval = readString(child, arg);
+            char* strval = readCString(child, arg);
             if (show) fprintf(stderr, "\"%s\"", strval);
             free(strval);
             break;
