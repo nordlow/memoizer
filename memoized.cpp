@@ -109,7 +109,7 @@ struct Trace
     /// Stated file paths by pid.
     PidsByPath pidsByStatPath;
 
-    /// Current working directory by pid.
+    /// Current working directory path by pid.
     std::unordered_map<pid_t, Path> cwdPathByPid;
 
     TimespecByPath maxTimespecByStatPath;
