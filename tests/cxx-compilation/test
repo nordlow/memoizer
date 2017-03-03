@@ -1,5 +1,4 @@
 #!/bin/bash
 
 make -C ../.. memoized &&
-../../memoized g++ main.cpp &&
-../../memoized a.out
+../../memoized g++ main.cpp
