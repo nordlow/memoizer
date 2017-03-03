@@ -1,0 +1,5 @@
+#!/bin/bash
+
+make -C ../.. memoized &&
+g++ main.cpp -o main &&
+../../memoized main

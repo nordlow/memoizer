@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <cassert>
+#include <cstdio>
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -18,7 +19,7 @@ int main(int argc, const char * argv[], const char * envp[])
     struct stat st;
     assert(stat("passwd", &st) == 0);
 
-    std::cout << "All ok!" << endl;
+    printf("All ok!\n");
 
     return 0;
 }
