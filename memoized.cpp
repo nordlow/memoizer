@@ -1,4 +1,4 @@
-// TODO add check for non-existing PROGRAM in call: ./memoized PROGRAM, for instance when foo is given when ./foo should be given
+// TODO add check for non-existing PROGRAM in call: ./memoized PROGRAM, for instance when `foo` is given when `./foo` should be given
 
 #include <sys/ptrace.h>
 #include <bits/types.h>
