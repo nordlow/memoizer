@@ -111,7 +111,7 @@ struct Trace
     /// Stated file paths by pid.
     PidsByPath pidsByStatPath;
 
-    /// Current working directory path by pid.
+    /// Current working directory path by pid_t.
     PathByPid cwdPathByPid;
 
     TimespecByPath maxTimespecByStatPath;
@@ -216,7 +216,7 @@ char *readString(pid_t child, unsigned long addr)
 Path readCxxString(pid_t child, unsigned long addr)
 {
     // TODO prevent allocation by reading directy into preallocated std::string
-    char* const pathC = readString(child, pidSyscallArg(child, 0)); // TODO prevent allocation
+    char* const pathC = readString(child, addr);
     Path path = pathC;
     free(pathC);
     return path;
