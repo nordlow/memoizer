@@ -2,4 +2,4 @@
 
 make -C ../.. memoized &&
 g++ main.cpp &&
-../../memoized a.out
+../../memoized ./a.out
