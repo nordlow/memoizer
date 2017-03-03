@@ -598,6 +598,11 @@ void handleSyscall(pid_t child, Trace& trace)
                     fprintf(stderr, "TODO handle system call fstat()\n");
                 }
             }
+            else if (syscall_num == SYS_chdir)
+            {
+                const Path path = readCxxString(child, pidSyscallArg(child, 0)); // TODO prevent allocation
+                fprintf(stderr, "memoized: TODO handle chdir(%s)\n", path.c_str());
+            }
             else if (syscall_num == SYS_getcwd)
             {
                 if (false)
