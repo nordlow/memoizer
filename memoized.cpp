@@ -23,6 +23,7 @@
 #include <vector>
 #include <string>
 #include <map>
+#include <unordered_map>
 #include <unordered_set>
 #include <algorithm>
 
@@ -107,6 +108,8 @@ struct Trace
 
     /// Stated file paths by pid.
     PidsByPath pidsByStatPath;
+
+    std::unordered_map<pid_t, Path> cwdPathByPid;
 
     TimespecByPath maxTimespecByStatPath;
 
@@ -601,6 +604,7 @@ void handleSyscall(pid_t child, Trace& trace)
             else if (syscall_num == SYS_chdir)
             {
                 const Path path = readCxxString(child, pidSyscallArg(child, 0)); // TODO prevent allocation
+                trace.cwdPathByPid[child] = path;
                 fprintf(stderr, "memoized: TODO handle chdir(%s)\n", path.c_str());
             }
             else if (syscall_num == SYS_getcwd)
