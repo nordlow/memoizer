@@ -93,6 +93,8 @@ struct PidMtime
 
 typedef std::vector<PidMtime> PidMtimes;
 
+typedef std::unordered_map<pid_t, Path> PathByPid;
+
 /// Trace results.
 struct Trace
 {
@@ -110,7 +112,7 @@ struct Trace
     PidsByPath pidsByStatPath;
 
     /// Current working directory path by pid.
-    std::unordered_map<pid_t, Path> cwdPathByPid;
+    PathByPid cwdPathByPid;
 
     TimespecByPath maxTimespecByStatPath;
 
