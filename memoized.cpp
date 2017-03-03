@@ -213,11 +213,11 @@ char *readCString(pid_t child, unsigned long addr)
     return val;
 }
 
-Path readCxxString(pid_t child, unsigned long addr)
+std::string readCxxString(pid_t child, unsigned long addr)
 {
     // TODO prevent allocation by reading directy into preallocated std::string
     char* const pathC = readCString(child, addr);
-    Path path = pathC;
+    std::string path = pathC;
     free(pathC);
     return path;
 }
