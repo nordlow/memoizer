@@ -454,8 +454,7 @@ void handleSyscall(pid_t child, Trace& trace)
                 const Path path = readCxxString(child, pidSyscallArg(child, 0)); // TODO prevent allocation
 
                 char cwdPath[PATH_MAX];
-                const ssize_t cwdRet = lookupPidCwdPath(child,
-                                                        cwdPath, sizeof(cwdPath));
+                const ssize_t cwdRet = lookupPidCwdPath(child, cwdPath, sizeof(cwdPath));
 
                 if (show)
                 {
