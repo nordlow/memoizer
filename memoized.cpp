@@ -684,8 +684,7 @@ int ptraceTopChild(pid_t top_child, Trace& trace)
         {
             // get pid of sub-child
             long newpid;
-            ptrace(PTRACE_GETEVENTMSG, child, NULL, (long) &newpid);
-
+            ptrace(PTRACE_GETEVENTMSG, child, NULL, (long)&newpid);
             ptrace(PTRACE_SYSCALL, newpid, NULL, NULL);
             fprintf(stderr, "memoized: info: attached to offspring %ld\n", newpid);
             break;
