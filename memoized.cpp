@@ -125,6 +125,11 @@ struct Trace
     SHA256_CTX inputHash;
 };
 
+struct Traces
+{
+    std::unordered_map<pid_t, Trace> traceByPid;
+};
+
 /** Wait for system call in `child`. */
 int waitForChildPidSyscall(pid_t child)
 {
