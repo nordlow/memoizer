@@ -2,8 +2,8 @@ GEN_TABLES=./gen_tables.py
 LINUX_SRC=/usr/include/asm
 
 CXX=g++
-CXXFLAGS=-Wall -Wextra -O2 -g -std=c++17
-LDFLAGS=-lssl -lcrypto -s		# SHA hashing support
+CXXFLAGS=-Wall -Wextra -O2 -std=c++17
+LDFLAGS=-lssl -lcrypto -s	# SHA hashing support
 
 all: memoized
 
