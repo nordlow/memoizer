@@ -22,9 +22,6 @@
 #include <cstring>
 #include <cinttypes>
 
-// OpenSSL
-#include <openssl/sha.h>
-
 // STL
 #include <vector>
 #include <string>
@@ -32,6 +29,31 @@
 #include <unordered_set>
 #include <set>
 #include <algorithm>
+#include <array>
+#include <memory>
+#include <iostream>
+#include <stdexcept>
+
+/// Run command `cmd`.
+std::string exec(const char* cmd)
+{
+    const size_t buflen = 4096;
+    std::array<char, buflen> buffer;
+    std::string result;
+    std::shared_ptr<FILE> pipe(popen(cmd, "r"), pclose);
+    if (!pipe) throw std::runtime_error("popen() failed!");
+    while (!feof(pipe.get()))
+    {
+        if (fgets(buffer.data(), buflen, pipe.get()) != NULL)
+        {
+            result += buffer.data();
+        }
+    }
+    return result;
+}
+
+// OpenSSL
+#include <openssl/sha.h>
 
 // system calls
 #include "syscalls.h"
