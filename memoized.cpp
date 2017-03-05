@@ -795,7 +795,7 @@ bool isHashableFilePath(const Path& path)
 }
 
 template<typename T>
-std::vector<T> setToSortedVector(const std::unordered_set<T>& uset)
+std::vector<T> toSortedVector(const std::unordered_set<T>& uset)
 {
     std::vector<T> vec(uset.begin(), uset.end());
     std::sort(vec.begin(), vec.end());
@@ -914,10 +914,7 @@ int main(int argc, char* argv[], char* envp[])
         {
             // const pid_t child = ent.first;
             const Trace1& trace1 = ent.second;
-            std::vector<Path> readPaths(trace1.readPaths.begin(),
-                                        trace1.readPaths.end());
-            std::sort(readPaths.begin(),
-                      readPaths.end());
+            std::vector<Path> readPaths = toSortedVector(trace1.readPaths);
             for (const Path& path : trace1.readPaths)
             {
                 if (isHashableFilePath(path))
