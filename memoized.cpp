@@ -30,6 +30,7 @@
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
+#include <set>
 #include <algorithm>
 
 // system calls
@@ -895,31 +896,42 @@ int main(int argc, char* argv[], char* envp[])
 
         fprintf(fi, "cwd: %s\n", cwd);
 
-        fprintf(fi, "writes:\n");
+        // collect pathss
+        std::set<Path> allWritePaths;
+        std::set<Path> allReadPaths;
+        std::set<Path> allStatPaths;
         for (auto const& ent : traces.trace1ByPid)
         {
-            // const pid_t child = ent.first;
             const Trace1& trace1 = ent.second;
-            for (const Path& path : toSortedVector(trace1.writePaths))
+            for (auto const& writePath : trace1.writePaths)
             {
-                if (isHashableFilePath(path))
-                {
-                    fprintf(fi, "%s%s\n", indentation, path.c_str());
-                }
+                allWritePaths.insert(writePath);
+            }
+            for (auto const& readPath : trace1.readPaths)
+            {
+                allReadPaths.insert(readPath);
+            }
+            for (auto const& statPath : trace1.statPaths)
+            {
+                allStatPaths.insert(statPath);
+            }
+        }
+
+        fprintf(fi, "writes:\n");
+        for (const Path& path : allWritePaths)
+        {
+            if (isHashableFilePath(path))
+            {
+                fprintf(fi, "%s%s\n", indentation, path.c_str());
             }
         }
 
         fprintf(fi, "reads:\n");
-        for (auto const& ent : traces.trace1ByPid)
+        for (const Path& path : allReadPaths)
         {
-            // const pid_t child = ent.first;
-            const Trace1& trace1 = ent.second;
-            for (const Path& path : toSortedVector(trace1.readPaths))
+            if (isHashableFilePath(path))
             {
-                if (isHashableFilePath(path))
-                {
-                    fprintf(fi, "%s%s\n", indentation, path.c_str());
-                }
+                fprintf(fi, "%s%s\n", indentation, path.c_str());
             }
         }
 
