@@ -432,8 +432,10 @@ Path absPath(Traces& traces, pid_t child, const Path& path)
     {
         char trueCwdPath[PATH_MAX];
         const ssize_t cwdRet = lookupPidCwdPath(child, trueCwdPath, sizeof(trueCwdPath));
+
         const Path& cachedCwdPath = traces.trace1ByPid[child].trueCwdPath;
         assert(cachedCwdPath == trueCwdPath);
+
         return buildPath(cachedCwdPath, path);
     }
 }
