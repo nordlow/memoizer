@@ -820,6 +820,12 @@ std::vector<T> toSortedVector(const std::unordered_set<T>& uset)
     return vec;
 }
 
+void gitShowRemoteOrigin()
+{
+    const auto execString = exec("git remote show origin");
+    fprintf(stdout, "%s", execString.c_str());
+}
+
 int main(int argc, char* argv[], char* envp[])
 {
     int push = 1;
