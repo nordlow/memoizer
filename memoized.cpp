@@ -130,14 +130,21 @@ struct Trace1
     /// System calls.
     DoneSyscalls doneSyscalls;
 
+    /// Absolute:
     /// Read-only opened absolute file paths.
     PathUSet absReadPaths;
-
     /// Write-only opened absolute file paths.
     PathUSet absWritePaths;
-
-    /// Stated absoulte file paths.
+    /// Stated absolute file paths.
     PathUSet absStatPaths;
+
+    /// Relative:
+    /// Read-only opened relative file paths.
+    PathUSet relReadPaths;
+    /// Write-only opened relative file paths.
+    PathUSet relWritePaths;
+    /// Stated relative file paths.
+    PathUSet relStatPaths;
 
     TimespecByPath maxTimespecByStatPath;
 
