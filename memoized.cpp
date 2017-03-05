@@ -665,7 +665,10 @@ int doChild(int argc, char **argv)
     args[argc] = NULL;
 
     ptrace(PTRACE_TRACEME);
-    fprintf(stderr, "memoized: info: execvp:%s\n", args[0]);
+    if (show)
+    {
+        fprintf(stderr, "memoized: info: execvp:%s\n", args[0]);
+    }
     kill(getpid(), SIGSTOP);    // stop it directly
 
     return execvp(args[0], args);
@@ -693,13 +696,19 @@ int ptraceTopChild(pid_t top_child, Traces& traces)
             long newpid;
             ptrace(PTRACE_GETEVENTMSG, child, NULL, (long)&newpid);
             ptrace(PTRACE_SYSCALL, newpid, NULL, NULL);
-            fprintf(stderr, "memoized: info: attached to offspring %ld\n", newpid);
+            if (show)
+            {
+                fprintf(stderr, "memoized: info: attached to offspring %ld\n", newpid);
+            }
             break;
         }
         default:
             if (WIFEXITED(status))
             {
-                fprintf(stderr, "memoized: info: child %d exited\n", child);
+                if (show)
+                {
+                    fprintf(stderr, "memoized: info: child %d exited\n", child);
+                }
                 if (child == top_child)
                 {
                     return 0;     // top child exited, we're done
@@ -734,7 +743,10 @@ void attachAndPtraceTopChild(pid_t top_child, Traces& traces)
     const long traceRetVal = ptrace(PTRACE_ATTACH, top_child, NULL, NULL);
     if (traceRetVal == 0)             // success
     {
-        fprintf(stderr, "memoized: info: attached to %d\n",top_child);
+        if (show)
+        {
+            fprintf(stderr, "memoized: info: attached to %d\n",top_child);
+        }
     }
     else
     {
