@@ -927,7 +927,7 @@ int main(int argc, char* argv[], char* envp[])
 
         fprintf(fi, "cwd: %s\n", cwd);
 
-        // collect pathss
+        // collect all paths
         std::set<Path> allAbsWritePaths;
         std::set<Path> allAbsReadPaths;
         std::set<Path> allAbsStatPaths;
