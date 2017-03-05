@@ -382,7 +382,7 @@ void printSyscall(pid_t child, long syscall_num, long retval)
     fprintf(stderr, "%d %s(", child, syscallNameOfNumber(syscall_num));
     printSyscallArgs(child, syscall_num);
     fprintf(stderr, ") = ");
-    fprintf(stderr, "%ld", retval);
+    fprintf(stderr, "%ld;", retval);
 }
 
 bool isAbsolutePath(const Path& path)
