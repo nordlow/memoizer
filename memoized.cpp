@@ -454,7 +454,7 @@ Path buildPath(const Path& a,
 
 void dln(const char *str)
 {
-    printf("memoized: debug: %s\n", str);
+    fprintf(stderr, "memoized: debug: %s\n", str);
 }
 
 Path absPath(Traces& traces, pid_t child, const Path& path)
@@ -468,7 +468,8 @@ Path absPath(Traces& traces, pid_t child, const Path& path)
         char trueCwdPath[PATH_MAX];
         const ssize_t cwdRet = lookupPidCwdPath(child, trueCwdPath, sizeof(trueCwdPath));
 
-        const Path& cachedCwdPath = traces.trace1ByPid[child].cwdPath;
+        const Path cachedCwdPath = traces.trace1ByPid[child].cwdPath;
+        dln(cachedCwdPath.c_str());
         // assert(cachedCwdPath == trueCwdPath);
 
         return buildPath(cachedCwdPath, path);
@@ -671,8 +672,7 @@ void handleSyscall(pid_t child, Traces& traces)
             }
             else if (syscall_num == SYS_chdir)
             {
-                const Path path = readCxxString(child, pidSyscallArg(child, 0)); // TODO prevent allocation
-                traces.trace1ByPid[child].cwdPath;
+                traces.trace1ByPid[child].cwdPath = readCxxString(child, pidSyscallArg(child, 0));
                 if (show)
                 {
                     printSyscall(child, syscall_num, retval);
@@ -693,13 +693,6 @@ void handleSyscall(pid_t child, Traces& traces)
                 // printSyscall(child, syscall_num, retval);
                 // endl(stderr);
                 // endl(stderr);
-            }
-
-            const bool verbose = false;
-            if (verbose)
-            {
-                printSyscall(child, syscall_num, retval);
-                endl();
             }
         }
         else                    // on failure return
