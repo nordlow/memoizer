@@ -738,7 +738,7 @@ int ptraceTopChild(pid_t top_child, Traces& traces)
     }
 }
 
-void attachAndPtraceTopChild(pid_t top_child, Traces& traces)
+int attachAndPtraceTopChild(pid_t top_child, Traces& traces)
 {
     const long traceRetVal = ptrace(PTRACE_ATTACH, top_child, NULL, NULL);
     if (traceRetVal == 0)             // success
@@ -751,6 +751,7 @@ void attachAndPtraceTopChild(pid_t top_child, Traces& traces)
     else
     {
         fprintf(stderr, "error: attach failed with return code %ld\n", traceRetVal);
+        return -1;
     }
 
     const long opt = (PTRACE_O_EXITKILL |
@@ -762,6 +763,8 @@ void attachAndPtraceTopChild(pid_t top_child, Traces& traces)
     ptrace(PTRACE_SETOPTIONS, top_child, NULL, opt);
 
     ptraceTopChild(top_child, traces);
+
+    return 0;
 }
 
 bool startsWith(const std::string& whole, const char* part)
@@ -839,7 +842,10 @@ int main(int argc, char* argv[], char* envp[])
         Traces traces;
         traces.homePath = getenv("HOME");
 
-        attachAndPtraceTopChild(topChild, traces);
+        if (attachAndPtraceTopChild(topChild, traces) < 0)
+        {
+            exit(-1);
+        }
 
         assertCacheDirTree(traces);
 
