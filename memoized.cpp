@@ -900,7 +900,7 @@ int main(int argc, char* argv[], char* envp[])
         {
             // const pid_t child = ent.first;
             const Trace1& trace1 = ent.second;
-            for (const Path& path : trace1.writePaths)
+            for (const Path& path : toSortedVector(trace1.writePaths))
             {
                 if (isHashableFilePath(path))
                 {
@@ -914,8 +914,7 @@ int main(int argc, char* argv[], char* envp[])
         {
             // const pid_t child = ent.first;
             const Trace1& trace1 = ent.second;
-            const std::vector<Path> readPaths = toSortedVector(trace1.readPaths);
-            for (const Path& path : trace1.readPaths)
+            for (const Path& path : toSortedVector(trace1.readPaths))
             {
                 if (isHashableFilePath(path))
                 {
@@ -929,7 +928,7 @@ int main(int argc, char* argv[], char* envp[])
         {
             // const pid_t child = ent.first;
             const Trace1& trace1 = ent.second;
-            for (const Path& path : trace1.statPaths)
+            for (const Path& path : toSortedVector(trace1.statPaths))
             {
                 if (isHashableFilePath(path))
                 {
