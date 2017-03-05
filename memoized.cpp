@@ -53,7 +53,7 @@
 
 #define getReg(child, name) __get_reg(child, offsetof(struct user, regs.name))
 
-const bool show = false;
+const bool show = true;
 
 long __get_reg(pid_t child, int off)
 {
@@ -839,9 +839,9 @@ int main(int argc, char* argv[], char* envp[])
         Traces traces;
         traces.homePath = getenv("HOME");
 
-        assertCacheDirTree(traces);
-
         attachAndPtraceTopChild(topChild, traces);
+
+        assertCacheDirTree(traces);
 
         char cwdBuf[PATH_MAX];
         const char* cwd = getcwd(cwdBuf, PATH_MAX);
