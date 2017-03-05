@@ -990,80 +990,98 @@ int main(int argc, char* argv[], char* envp[])
             }
         }
 
-        fprintf(fi, "relative writes:\n");
-        for (const Path& path : allRelWritePaths)
+        if (!allRelWritePaths.empty())
         {
-            if (isHashableFilePath(path))
-            {
-                fprintf(fi, "%s%s\n", indentation, path.c_str());
-            }
-        }
-        fprintf(fi, "relative reads:\n");
-        for (const Path& path : allRelReadPaths)
-        {
-            if (isHashableFilePath(path))
-            {
-                fprintf(fi, "%s%s\n", indentation, path.c_str());
-            }
-        }
-        fprintf(fi, "relative stats:\n");
-        for (auto const& ent : traces.trace1ByPid)
-        {
-            // const pid_t child = ent.first;
-            const Trace1& trace1 = ent.second;
-            for (const Path& path : toSortedVector(trace1.relStatPaths))
+            fprintf(fi, "relative writes:\n");
+            for (const Path& path : allRelWritePaths)
             {
                 if (isHashableFilePath(path))
                 {
-                    fprintf(fi, "%s%s", indentation, path.c_str());
-                    auto hit = trace1.maxTimespecByStatPath.find(Path(path));
-                    if (hit != trace1.maxTimespecByStatPath.end()) // if hit
+                    fprintf(fi, "%s%s\n", indentation, path.c_str());
+                }
+            }
+        }
+        if (!allRelReadPaths.empty())
+        {
+            fprintf(fi, "relative reads:\n");
+            for (const Path& path : allRelReadPaths)
+            {
+                if (isHashableFilePath(path))
+                {
+                    fprintf(fi, "%s%s\n", indentation, path.c_str());
+                }
+            }
+        }
+        if (!allRelStatPaths.empty())
+        {
+            fprintf(fi, "relative stats:\n");
+            for (auto const& ent : traces.trace1ByPid)
+            {
+                // const pid_t child = ent.first;
+                const Trace1& trace1 = ent.second;
+                for (const Path& path : toSortedVector(trace1.relStatPaths))
+                {
+                    if (isHashableFilePath(path))
                     {
-                        fprintf(fi,
-                                " %ld.%09ld",
-                                hit->second.tv_sec,
-                                hit->second.tv_nsec);
+                        fprintf(fi, "%s%s", indentation, path.c_str());
+                        auto hit = trace1.maxTimespecByStatPath.find(Path(path));
+                        if (hit != trace1.maxTimespecByStatPath.end()) // if hit
+                        {
+                            fprintf(fi,
+                                    " %ld.%09ld",
+                                    hit->second.tv_sec,
+                                    hit->second.tv_nsec);
+                        }
+                        endl(fi);
                     }
-                    endl(fi);
                 }
             }
         }
 
-        fprintf(fi, "absolute writes:\n");
-        for (const Path& path : allAbsWritePaths)
+        if (!allAbsWritePaths.empty())
         {
-            if (isHashableFilePath(path))
-            {
-                fprintf(fi, "%s%s\n", indentation, path.c_str());
-            }
-        }
-        fprintf(fi, "absolute reads:\n");
-        for (const Path& path : allAbsReadPaths)
-        {
-            if (isHashableFilePath(path))
-            {
-                fprintf(fi, "%s%s\n", indentation, path.c_str());
-            }
-        }
-        fprintf(fi, "absolute stats:\n");
-        for (auto const& ent : traces.trace1ByPid)
-        {
-            // const pid_t child = ent.first;
-            const Trace1& trace1 = ent.second;
-            for (const Path& path : toSortedVector(trace1.absStatPaths))
+            fprintf(fi, "absolute writes:\n");
+            for (const Path& path : allAbsWritePaths)
             {
                 if (isHashableFilePath(path))
                 {
-                    fprintf(fi, "%s%s", indentation, path.c_str());
-                    auto hit = trace1.maxTimespecByStatPath.find(Path(path));
-                    if (hit != trace1.maxTimespecByStatPath.end()) // if hit
+                    fprintf(fi, "%s%s\n", indentation, path.c_str());
+                }
+            }
+        }
+        if (!allAbsWritePaths.empty())
+        {
+            fprintf(fi, "absolute reads:\n");
+            for (const Path& path : allAbsReadPaths)
+            {
+                if (isHashableFilePath(path))
+                {
+                    fprintf(fi, "%s%s\n", indentation, path.c_str());
+                }
+            }
+        }
+        if (!allAbsStatPaths.empty())
+        {
+            fprintf(fi, "absolute stats:\n");
+            for (auto const& ent : traces.trace1ByPid)
+            {
+                // const pid_t child = ent.first;
+                const Trace1& trace1 = ent.second;
+                for (const Path& path : toSortedVector(trace1.absStatPaths))
+                {
+                    if (isHashableFilePath(path))
                     {
-                        fprintf(fi,
-                                " %ld.%09ld",
-                                hit->second.tv_sec,
-                                hit->second.tv_nsec);
+                        fprintf(fi, "%s%s", indentation, path.c_str());
+                        auto hit = trace1.maxTimespecByStatPath.find(Path(path));
+                        if (hit != trace1.maxTimespecByStatPath.end()) // if hit
+                        {
+                            fprintf(fi,
+                                    " %ld.%09ld",
+                                    hit->second.tv_sec,
+                                    hit->second.tv_nsec);
+                        }
+                        endl(fi);
                     }
-                    endl(fi);
                 }
             }
         }
