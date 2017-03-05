@@ -915,6 +915,9 @@ int main(int argc, char* argv[], char* envp[])
 
         const char* indentation = "    ";
 
+        fprintf(fi, "program:\n");
+        fprintf(fi, "    TODO absolute path of program along with mtime and sha256:\n");
+
         fprintf(fi, "call:\n");
         for (int i = 1; i != argc; ++i) // all but first argument
         {
