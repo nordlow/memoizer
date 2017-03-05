@@ -130,14 +130,14 @@ struct Trace1
     /// System calls.
     DoneSyscalls doneSyscalls;
 
-    /// Read-only opened file paths.
-    PathUSet readPaths;
+    /// Absolute read-only opened file paths.
+    PathUSet absReadPaths;
 
-    /// Write-only opened file paths.
-    PathUSet writePaths;
+    /// Absolute write-only opened file paths.
+    PathUSet absWritePaths;
 
     /// Stated file paths.
-    PathUSet statPaths;
+    PathUSet absStatPaths;
 
     TimespecByPath maxTimespecByStatPath;
 
@@ -520,7 +520,7 @@ void handleSyscall(pid_t child, Traces& traces)
                     const struct stat stat = readStat(child, pidSyscallArg(child, 1));
                     struct timespec mtime = stat.st_mtim; // modification time
 
-                    traces.trace1ByPid[child].statPaths.insert(path);
+                    traces.trace1ByPid[child].absStatPaths.insert(path);
 
                     auto hit = traces.trace1ByPid[child].maxTimespecByStatPath.find(path);
                     if (hit != traces.trace1ByPid[child].maxTimespecByStatPath.end()) // if hit
@@ -571,12 +571,12 @@ void handleSyscall(pid_t child, Traces& traces)
 
                     if (read_flag)
                     {
-                        traces.trace1ByPid[child].readPaths.insert(path);
+                        traces.trace1ByPid[child].absReadPaths.insert(path);
                     }
 
                     if (write_flag)
                     {
-                        traces.trace1ByPid[child].writePaths.insert(path);
+                        traces.trace1ByPid[child].absWritePaths.insert(path);
                     }
 
                     if (show)
@@ -917,28 +917,28 @@ int main(int argc, char* argv[], char* envp[])
         fprintf(fi, "cwd: %s\n", cwd);
 
         // collect pathss
-        std::set<Path> allWritePaths;
-        std::set<Path> allReadPaths;
-        std::set<Path> allStatPaths;
+        std::set<Path> allAbsWritePaths;
+        std::set<Path> allAbsReadPaths;
+        std::set<Path> allAbsStatPaths;
         for (auto const& ent : traces.trace1ByPid)
         {
             const Trace1& trace1 = ent.second;
-            for (auto const& writePath : trace1.writePaths)
+            for (auto const& writePath : trace1.absWritePaths)
             {
-                allWritePaths.insert(writePath);
+                allAbsWritePaths.insert(writePath);
             }
-            for (auto const& readPath : trace1.readPaths)
+            for (auto const& absReadPath : trace1.absReadPaths)
             {
-                allReadPaths.insert(readPath);
+                allAbsReadPaths.insert(absReadPath);
             }
-            for (auto const& statPath : trace1.statPaths)
+            for (auto const& statPath : trace1.absStatPaths)
             {
-                allStatPaths.insert(statPath);
+                allAbsStatPaths.insert(statPath);
             }
         }
 
         fprintf(fi, "writes:\n");
-        for (const Path& path : allWritePaths)
+        for (const Path& path : allAbsWritePaths)
         {
             if (isHashableFilePath(path))
             {
@@ -947,7 +947,7 @@ int main(int argc, char* argv[], char* envp[])
         }
 
         fprintf(fi, "reads:\n");
-        for (const Path& path : allReadPaths)
+        for (const Path& path : allAbsReadPaths)
         {
             if (isHashableFilePath(path))
             {
@@ -960,7 +960,7 @@ int main(int argc, char* argv[], char* envp[])
         {
             // const pid_t child = ent.first;
             const Trace1& trace1 = ent.second;
-            for (const Path& path : toSortedVector(trace1.statPaths))
+            for (const Path& path : toSortedVector(trace1.absStatPaths))
             {
                 if (isHashableFilePath(path))
                 {
