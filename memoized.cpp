@@ -137,32 +137,6 @@ struct Traces
     std::unordered_map<pid_t, Trace1> trace1ByPid;
 };
 
-/** Wait for system call in `child`. */
-int waitForChildPidSyscall(pid_t child)
-{
-    while (true)
-    {
-        // tracee is stopped at the next entry to or exit from a system call
-        ptrace(PTRACE_SYSCALL, child, 0, 0);
-
-        int status;
-        waitpid(child, &status, 0); // wait for child
-
-        if (WIFSTOPPED(status) &&    // if child stopped and
-            WSTOPSIG(status) & 0x80) // highest bit set
-        {
-            return 0;
-        }
-
-        if (WIFEXITED(status))  // if child exited
-        {
-            return 1;
-        }
-
-        fprintf(stderr, "[stopped status:%d stopsignal:%x]\n", status, WSTOPSIG(status));
-    }
-}
-
 const char *syscallNameOfNumber(int syscallNumber)
 {
     if (syscallNumber <= MAX_SYSCALL_NUM)
@@ -986,3 +960,29 @@ int main(int argc, char* argv[], char* envp[])
         fclose(fi);
     }
 }
+
+/** Wait for system call in `child`. */
+// int waitForChildPidSyscall(pid_t child)
+// {
+//     while (true)
+//     {
+//         // tracee is stopped at the next entry to or exit from a system call
+//         ptrace(PTRACE_SYSCALL, child, 0, 0);
+
+//         int status;
+//         waitpid(child, &status, 0); // wait for child
+
+//         if (WIFSTOPPED(status) &&    // if child stopped and
+//             WSTOPSIG(status) & 0x80) // highest bit set
+//         {
+//             return 0;
+//         }
+
+//         if (WIFEXITED(status))  // if child exited
+//         {
+//             return 1;
+//         }
+
+//         fprintf(stderr, "[stopped status:%d stopsignal:%x]\n", status, WSTOPSIG(status));
+//     }
+// }
