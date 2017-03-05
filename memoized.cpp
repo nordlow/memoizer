@@ -119,7 +119,11 @@ typedef std::vector<PidMtime> PidMtimes;
 
 typedef std::unordered_map<pid_t, Path> PathByPid;
 
+/// Unordered paths.
 typedef std::unordered_set<Path> PathUSet;
+
+/// Ordered paths.
+typedef std::set<Path> PathOSet;
 
 /// Trace results for a specific process.
 struct Trace1
@@ -928,9 +932,9 @@ int main(int argc, char* argv[], char* envp[])
         fprintf(fi, "cwd: %s\n", cwd);
 
         // collect all paths
-        std::set<Path> allAbsWritePaths;
-        std::set<Path> allAbsReadPaths;
-        std::set<Path> allAbsStatPaths;
+        PathOSet allAbsWritePaths;
+        PathOSet allAbsReadPaths;
+        PathOSet allAbsStatPaths;
         for (auto const& ent : traces.trace1ByPid)
         {
             const Trace1& trace1 = ent.second;
