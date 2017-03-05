@@ -754,9 +754,11 @@ int attachAndPtraceTopChild(pid_t top_child, Traces& traces)
         }
         else
         {
-            fprintf(stderr, "error: attach failed with return code %ld\n", traceRetVal);
+            fprintf(stderr, "warning: attach failed with return code %ld\n", traceRetVal);
         }
     }
+    fprintf(stderr, "error: attach failed %d times\n", tryCountMax);
+    return -1;
 ok:
 
     const long opt = (PTRACE_O_EXITKILL |
@@ -847,9 +849,10 @@ int main(int argc, char* argv[], char* envp[])
         Traces traces;
         traces.homePath = getenv("HOME");
 
-        if (attachAndPtraceTopChild(topChild, traces) < 0)
+        const int attachRetVal = attachAndPtraceTopChild(topChild, traces);
+        if (attachRetVal < 0)
         {
-            exit(-1);
+            exit(attachRetVal);
         }
 
         assertCacheDirTree(traces);
