@@ -468,7 +468,12 @@ Path absPath(Traces& traces, pid_t child, const Path& path)
         char trueCwdPath[PATH_MAX];
         const ssize_t cwdRet = lookupPidCwdPath(child, trueCwdPath, sizeof(trueCwdPath));
         const Path cachedCwdPath = traces.trace1ByPid[child].cwdPath;
-        assert(cachedCwdPath == trueCwdPath);
+
+        assert(cachedCwdPath.size()); // should be defined
+
+        // TODO only in debug mode
+        assert(cachedCwdPath == trueCwdPath); // check against current value
+
         return buildPath(cachedCwdPath, path);
     }
 }
