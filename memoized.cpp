@@ -880,7 +880,7 @@ int main(int argc, char* argv[], char* envp[])
         const char* indentation = "    ";
 
         fprintf(fi, "call:\n");
-        for (int i = 0; i != argc; ++i)
+        for (int i = 1; i != argc; ++i) // all but first argument
         {
             fprintf(fi, "%s%s\n", indentation, argv[i]);
         }
