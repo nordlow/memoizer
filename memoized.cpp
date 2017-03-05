@@ -464,7 +464,7 @@ Path absPath(Traces& traces, pid_t child, const Path& path)
         const ssize_t cwdRet = lookupPidCwdPath(child, trueCwdPath, sizeof(trueCwdPath));
 
         const Path& cachedCwdPath = traces.trace1ByPid[child].cwdPath;
-        assert(cachedCwdPath == trueCwdPath);
+        // assert(cachedCwdPath == trueCwdPath);
 
         return buildPath(cachedCwdPath, path);
     }
@@ -582,12 +582,26 @@ void handleSyscall(pid_t child, Traces& traces)
 
                     if (read_flag)
                     {
-                        traces.trace1ByPid[child].absReadPaths.insert(path);
+                        if (isAbsolutePath(path))
+                        {
+                            traces.trace1ByPid[child].absReadPaths.insert(path);
+                        }
+                        else
+                        {
+                            traces.trace1ByPid[child].relReadPaths.insert(absPath(traces, child, path));
+                        }
                     }
 
                     if (write_flag)
                     {
-                        traces.trace1ByPid[child].absWritePaths.insert(path);
+                        if (isAbsolutePath(path))
+                        {
+                            traces.trace1ByPid[child].absWritePaths.insert(path);
+                        }
+                        else
+                        {
+                            traces.trace1ByPid[child].relWritePaths.insert(absPath(traces, child, path));
+                        }
                     }
 
                     if (show)
@@ -935,6 +949,9 @@ int main(int argc, char* argv[], char* envp[])
         PathOSet allAbsWritePaths;
         PathOSet allAbsReadPaths;
         PathOSet allAbsStatPaths;
+        PathOSet allRelWritePaths;
+        PathOSet allRelReadPaths;
+        PathOSet allRelStatPaths;
         for (auto const& ent : traces.trace1ByPid)
         {
             const Trace1& trace1 = ent.second;
@@ -949,6 +966,36 @@ int main(int argc, char* argv[], char* envp[])
             for (auto const& statPath : trace1.absStatPaths)
             {
                 allAbsStatPaths.insert(statPath);
+            }
+            for (auto const& writePath : trace1.relWritePaths)
+            {
+                allRelWritePaths.insert(writePath);
+            }
+            for (auto const& relReadPath : trace1.relReadPaths)
+            {
+                allRelReadPaths.insert(relReadPath);
+            }
+            for (auto const& statPath : trace1.relStatPaths)
+            {
+                allRelStatPaths.insert(statPath);
+            }
+        }
+
+        fprintf(fi, "relative writes:\n");
+        for (const Path& path : allRelWritePaths)
+        {
+            if (isHashableFilePath(path))
+            {
+                fprintf(fi, "%s%s\n", indentation, path.c_str());
+            }
+        }
+
+        fprintf(fi, "relative reads:\n");
+        for (const Path& path : allRelReadPaths)
+        {
+            if (isHashableFilePath(path))
+            {
+                fprintf(fi, "%s%s\n", indentation, path.c_str());
             }
         }
 
