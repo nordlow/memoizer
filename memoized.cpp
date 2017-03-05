@@ -531,7 +531,14 @@ void handleSyscall(pid_t child, Traces& traces)
                     const struct stat stat = readStat(child, pidSyscallArg(child, 1));
                     struct timespec mtime = stat.st_mtim; // modification time
 
-                    traces.trace1ByPid[child].absStatPaths.insert(path);
+                    if (isAbsolutePath(path))
+                    {
+                        traces.trace1ByPid[child].absStatPaths.insert(path);
+                    }
+                    else
+                    {
+                        traces.trace1ByPid[child].relStatPaths.insert(absPath(traces, child, path));
+                    }
 
                     auto hit = traces.trace1ByPid[child].maxTimespecByStatPath.find(path);
                     if (hit != traces.trace1ByPid[child].maxTimespecByStatPath.end()) // if hit
@@ -989,13 +996,34 @@ int main(int argc, char* argv[], char* envp[])
                 fprintf(fi, "%s%s\n", indentation, path.c_str());
             }
         }
-
         fprintf(fi, "relative reads:\n");
         for (const Path& path : allRelReadPaths)
         {
             if (isHashableFilePath(path))
             {
                 fprintf(fi, "%s%s\n", indentation, path.c_str());
+            }
+        }
+        fprintf(fi, "relative stats:\n");
+        for (auto const& ent : traces.trace1ByPid)
+        {
+            // const pid_t child = ent.first;
+            const Trace1& trace1 = ent.second;
+            for (const Path& path : toSortedVector(trace1.relStatPaths))
+            {
+                if (isHashableFilePath(path))
+                {
+                    fprintf(fi, "%s%s", indentation, path.c_str());
+                    auto hit = trace1.maxTimespecByStatPath.find(Path(path));
+                    if (hit != trace1.maxTimespecByStatPath.end()) // if hit
+                    {
+                        fprintf(fi,
+                                " %ld.%09ld",
+                                hit->second.tv_sec,
+                                hit->second.tv_nsec);
+                    }
+                    endl(fi);
+                }
             }
         }
 
@@ -1007,7 +1035,6 @@ int main(int argc, char* argv[], char* envp[])
                 fprintf(fi, "%s%s\n", indentation, path.c_str());
             }
         }
-
         fprintf(fi, "absolute reads:\n");
         for (const Path& path : allAbsReadPaths)
         {
@@ -1016,7 +1043,6 @@ int main(int argc, char* argv[], char* envp[])
                 fprintf(fi, "%s%s\n", indentation, path.c_str());
             }
         }
-
         fprintf(fi, "absolute stats:\n");
         for (auto const& ent : traces.trace1ByPid)
         {
