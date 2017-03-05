@@ -1,4 +1,6 @@
-/// D wrapper for Linux' ptrace API.
+/** D wrapper for Linux' ptrace API.
+ * See also http://forum.dlang.org/post/jn9ea4$dtt$1@digitalmars.com
+ */
 module ptrace;
 
 import core.stdc.stdio;
