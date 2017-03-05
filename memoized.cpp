@@ -902,10 +902,11 @@ int main(int argc, char* argv[], char* envp[])
         assertCacheDirTree(traces);
 
         char cwdBuf[PATH_MAX];
-        const char* cwd = getcwd(cwdBuf, PATH_MAX);
-        assert(cwd);
+        const std::string cwd = getcwd(cwdBuf, PATH_MAX);
+        assert(cwd.size());
 
-        // TODO lookup argv[0] in path
+        std::string progPath = argv[0];
+        std::string progAbsPath = cwd + ("/" + progPath);
 
         // TODO calculate chash from `pwd` `argv` and 'env' used in child
 
@@ -916,7 +917,7 @@ int main(int argc, char* argv[], char* envp[])
         const char* indentation = "    ";
 
         fprintf(fi, "program:\n");
-        fprintf(fi, "    TODO absolute path of program along with its mtime and sha256:\n");
+        fprintf(fi, "    %s TODO st_mtime and sha256:\n", progAbsPath.c_str());
 
         fprintf(fi, "call:\n");
         for (int i = 1; i != argc; ++i) // all but first argument
