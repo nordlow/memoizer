@@ -948,7 +948,7 @@ int main(int argc, char* argv[], char* envp[])
             }
         }
 
-        fprintf(fi, "writes:\n");
+        fprintf(fi, "absolute writes:\n");
         for (const Path& path : allAbsWritePaths)
         {
             if (isHashableFilePath(path))
@@ -957,7 +957,7 @@ int main(int argc, char* argv[], char* envp[])
             }
         }
 
-        fprintf(fi, "reads:\n");
+        fprintf(fi, "absolute reads:\n");
         for (const Path& path : allAbsReadPaths)
         {
             if (isHashableFilePath(path))
@@ -966,7 +966,7 @@ int main(int argc, char* argv[], char* envp[])
             }
         }
 
-        fprintf(fi, "stats:\n");
+        fprintf(fi, "absolute stats:\n");
         for (auto const& ent : traces.trace1ByPid)
         {
             // const pid_t child = ent.first;
