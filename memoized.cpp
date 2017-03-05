@@ -794,6 +794,14 @@ bool isHashableFilePath(const Path& path)
             (!startsWith(path, "/dev/urandom")));
 }
 
+template<typename T>
+std::vector<T> setToSortedVector(const std::unordered_set<T>& uset)
+{
+    std::vector<T> vec(uset.begin(), uset.end());
+    std::sort(vec.begin(), vec.end());
+    return vec;
+}
+
 int main(int argc, char* argv[], char* envp[])
 {
     int push = 1;
@@ -906,6 +914,10 @@ int main(int argc, char* argv[], char* envp[])
         {
             // const pid_t child = ent.first;
             const Trace1& trace1 = ent.second;
+            std::vector<Path> readPaths(trace1.readPaths.begin(),
+                                        trace1.readPaths.end());
+            std::sort(readPaths.begin(),
+                      readPaths.end());
             for (const Path& path : trace1.readPaths)
             {
                 if (isHashableFilePath(path))
