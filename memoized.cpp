@@ -902,8 +902,8 @@ int main(int argc, char* argv[], char* envp[])
         assertCacheDirTree(traces);
 
         char cwdBuf[PATH_MAX];
-        const std::string cwd = getcwd(cwdBuf, PATH_MAX);
-        assert(cwd.size());
+        const char* cwd = getcwd(cwdBuf, PATH_MAX);
+        assert(cwd);
 
         std::string progPath = argv[0];
         std::string progAbsPath = cwd + ("/" + progPath);
