@@ -914,7 +914,7 @@ int main(int argc, char* argv[], char* envp[])
         {
             // const pid_t child = ent.first;
             const Trace1& trace1 = ent.second;
-            std::vector<Path> readPaths = toSortedVector(trace1.readPaths);
+            const std::vector<Path> readPaths = toSortedVector(trace1.readPaths);
             for (const Path& path : trace1.readPaths)
             {
                 if (isHashableFilePath(path))
