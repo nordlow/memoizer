@@ -674,7 +674,7 @@ int doChild(int argc, char **argv)
     return execvp(args[0], args);
 }
 
-int ptraceTopChild(pid_t top_child, Traces& traces)
+int ptraceTopChild(pid_t topChild, Traces& traces)
 {
     while (true)
     {
@@ -709,7 +709,7 @@ int ptraceTopChild(pid_t top_child, Traces& traces)
                 {
                     fprintf(stderr, "memoized: info: child %d exited\n", child);
                 }
-                if (child == top_child)
+                if (child == topChild)
                 {
                     return 0;     // top child exited, we're done
                 }
@@ -738,17 +738,18 @@ int ptraceTopChild(pid_t top_child, Traces& traces)
     }
 }
 
-int attachAndPtraceTopChild(pid_t top_child, Traces& traces)
+
+int tryAttachToPid(pid_t child)
 {
     const uint tryCountMax = 1000;
     for (uint tryCount = 0; tryCount < tryCountMax; ++tryCount)
     {
-        const long traceRetVal = ptrace(PTRACE_ATTACH, top_child, NULL, NULL);
+        const long traceRetVal = ptrace(PTRACE_ATTACH, child, NULL, NULL);
         if (traceRetVal == 0)             // success
         {
             if (show)
             {
-                fprintf(stderr, "memoized: info: attached to %d\n",top_child);
+                fprintf(stderr, "memoized: info: attached to child with pid=%d\n", child);
             }
             goto ok;
         }
@@ -760,6 +761,13 @@ int attachAndPtraceTopChild(pid_t top_child, Traces& traces)
     fprintf(stderr, "error: attach failed %d times\n", tryCountMax);
     return -1;
 ok:
+    return 0;
+}
+
+int attachAndPtraceTopChild(Traces& traces, pid_t topChild)
+{
+    const int retVal = tryAttachToPid(topChild);
+    if (retVal < 0) { return retVal; }
 
     const long opt = (PTRACE_O_EXITKILL |
                       PTRACE_O_TRACEEXEC |
@@ -767,9 +775,9 @@ ok:
                       PTRACE_O_TRACECLONE |
                       PTRACE_O_TRACEVFORK |
                       PTRACE_O_TRACEVFORKDONE);
-    ptrace(PTRACE_SETOPTIONS, top_child, NULL, opt);
+    ptrace(PTRACE_SETOPTIONS, topChild, NULL, opt);
 
-    ptraceTopChild(top_child, traces);
+    ptraceTopChild(topChild, traces);
 
     return 0;
 }
@@ -849,7 +857,7 @@ int main(int argc, char* argv[], char* envp[])
         Traces traces;
         traces.homePath = getenv("HOME");
 
-        const int attachRetVal = attachAndPtraceTopChild(topChild, traces);
+        const int attachRetVal = attachAndPtraceTopChild(traces, topChild);
         if (attachRetVal < 0)
         {
             exit(attachRetVal);
