@@ -740,19 +740,24 @@ int ptraceTopChild(pid_t top_child, Traces& traces)
 
 int attachAndPtraceTopChild(pid_t top_child, Traces& traces)
 {
-    const long traceRetVal = ptrace(PTRACE_ATTACH, top_child, NULL, NULL);
-    if (traceRetVal == 0)             // success
+    const uint tryCountMax = 1000;
+    for (uint tryCount = 0; tryCount < tryCountMax; ++tryCount)
     {
-        if (show)
+        const long traceRetVal = ptrace(PTRACE_ATTACH, top_child, NULL, NULL);
+        if (traceRetVal == 0)             // success
         {
-            fprintf(stderr, "memoized: info: attached to %d\n",top_child);
+            if (show)
+            {
+                fprintf(stderr, "memoized: info: attached to %d\n",top_child);
+            }
+            goto ok;
+        }
+        else
+        {
+            fprintf(stderr, "error: attach failed with return code %ld\n", traceRetVal);
         }
     }
-    else
-    {
-        fprintf(stderr, "error: attach failed with return code %ld\n", traceRetVal);
-        return -1;              // just signal error
-    }
+ok:
 
     const long opt = (PTRACE_O_EXITKILL |
                       PTRACE_O_TRACEEXEC |
