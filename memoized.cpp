@@ -452,6 +452,11 @@ Path buildPath(const Path& a,
     return a + "/" + b;
 }
 
+void dln(const char *str)
+{
+    printf("memoized: debug: %s\n", str);
+}
+
 Path absPath(Traces& traces, pid_t child, const Path& path)
 {
     if (isAbsolutePath(path))
@@ -499,10 +504,7 @@ void handleSyscall(pid_t child, Traces& traces)
             {
                 const Path path = readCxxString(child, pidSyscallArg(child, 0)); // TODO prevent allocation
 
-                if (show)
-                {
-                    printSyscall(child, syscall_num, retval);
-                }
+                if (show) { printSyscall(child, syscall_num, retval); }
 
                 char linkDestPath[PATH_MAX];
                 if (syscall_num == SYS_open ||
@@ -671,6 +673,11 @@ void handleSyscall(pid_t child, Traces& traces)
             {
                 const Path path = readCxxString(child, pidSyscallArg(child, 0)); // TODO prevent allocation
                 traces.trace1ByPid[child].cwdPath;
+                if (show)
+                {
+                    printSyscall(child, syscall_num, retval);
+                    endl(stderr);
+                }
             }
             else if (syscall_num == SYS_getcwd)
             {
