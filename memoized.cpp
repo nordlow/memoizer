@@ -452,6 +452,12 @@ Path buildPath(const Path& a,
     return a + "/" + b;
 }
 
+Path buildPath(const Path& a,
+               const char* b)
+{
+    return a + "/" + b;
+}
+
 void dln(const char *str)
 {
     fprintf(stderr, "memoized: debug: %s\n", str);
@@ -465,16 +471,27 @@ Path absPath(Traces& traces, pid_t child, const Path& path)
     }
     else
     {
-        char trueCwdPath[PATH_MAX];
-        const ssize_t cwdRet = lookupPidCwdPath(child, trueCwdPath, sizeof(trueCwdPath));
         const Path cachedCwdPath = traces.trace1ByPid[child].cwdPath;
-
-        assert(cachedCwdPath.size()); // should be defined
-
-        // TODO only in debug mode
-        assert(cachedCwdPath == trueCwdPath); // check against current value
-
-        return buildPath(cachedCwdPath, path);
+        if (!cachedCwdPath.empty()) // if a chdir has been called by child
+        {
+            if (true)           // TODO only in debug mode
+            {
+                char trueCwdPath[PATH_MAX];
+                const ssize_t cwdRet = lookupPidCwdPath(child, trueCwdPath, sizeof(trueCwdPath));
+                if (cwdRet >= 0)
+                {
+                    assert(cachedCwdPath == trueCwdPath); // check against current value
+                }
+            }
+            return buildPath(cachedCwdPath, path);
+        }
+        else
+        {
+            char trueCwdPath[PATH_MAX];
+            const ssize_t cwdRet = lookupPidCwdPath(child, trueCwdPath, sizeof(trueCwdPath));
+            assert(cwdRet >= 0);
+            return buildPath(cachedCwdPath, trueCwdPath);
+        }
     }
 }
 
