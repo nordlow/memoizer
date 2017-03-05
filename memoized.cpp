@@ -28,7 +28,6 @@
 // STL
 #include <vector>
 #include <string>
-#include <map>
 #include <unordered_map>
 #include <unordered_set>
 #include <algorithm>
@@ -70,8 +69,7 @@ typedef std::unordered_set<Path> Paths;
 typedef std::unordered_set<pid_t> Pids;
 
 typedef std::vector<Path> DoneSyscalls[MAX_SYSCALL_NUM + 1];
-typedef std::map<Path, Pids> PidsByPath;
-typedef std::map<Path, timespec> TimespecByPath;
+typedef std::unordered_map<Path, timespec> TimespecByPath;
 
 bool operator < (const timespec& lhs,
                  const timespec& rhs)
@@ -101,33 +99,41 @@ typedef std::vector<PidMtime> PidMtimes;
 
 typedef std::unordered_map<pid_t, Path> PathByPid;
 
-/// Trace results.
-struct Trace
-{
-    Path homePath;
+typedef std::unordered_set<Path> PathUSet;
 
+/// Trace results for a specific process.
+struct Trace1
+{
+    /// Current working directory path.
+    Path cwdPath;
+
+    /// System calls.
     DoneSyscalls doneSyscalls;
 
-    /// Read-only opened file paths by process id (pid_t).
-    PidsByPath pidsByReadPath;
+    /// Read-only opened file paths.
+    PathUSet readPaths;
 
-    /// Write-only opened file paths by process id (pid_t).
-    PidsByPath pidsByWritePath;
+    /// Write-only opened file paths.
+    PathUSet writePaths;
 
-    /// Stated file paths by pid.
-    PidsByPath pidsByStatPath;
-
-    /// Current working directory path by pid_t.
-    PathByPid cwdPathByPid;
+    /// Stated file paths.
+    PathUSet statPaths;
 
     TimespecByPath maxTimespecByStatPath;
 
-    SHA256_CTX inputHash;
+    // SHA256_CTX inputHash;
+    // SHA256_Init(&traces.inputHash);
+    // int SHA256_Update(SHA256_CTX *c, const void *data, size_t len);
+    // int SHA256_Final(unsigned char *md, SHA256_CTX *c);
 };
 
+/// All current traces.
 struct Traces
 {
-    std::unordered_map<pid_t, Trace> traceByPid;
+    Path homePath;
+
+    /// Traces by process `pid_t`.
+    std::unordered_map<pid_t, Trace1> trace1ByPid;
 };
 
 /** Wait for system call in `child`. */
@@ -385,14 +391,14 @@ bool isAbsolutePath(const Path& path)
 }
 
 /// Create tree cache directories if it doesn't exist.
-void assertCacheDirTree(Trace& trace)
+void assertCacheDirTree(Traces& traces)
 {
     const mode_t mode = 0777;
     // Python os.makedirs()
-    mkdir((trace.homePath + "/.cache").c_str(), mode);
-    mkdir((trace.homePath + "/.cache/memoized").c_str(), mode);
-    mkdir((trace.homePath + "/.cache/memoized/artifacts").c_str(), mode);
-    mkdir((trace.homePath + "/.cache/memoized/calls").c_str(), mode);
+    mkdir((traces.homePath + "/.cache").c_str(), mode);
+    mkdir((traces.homePath + "/.cache/memoized").c_str(), mode);
+    mkdir((traces.homePath + "/.cache/memoized/artifacts").c_str(), mode);
+    mkdir((traces.homePath + "/.cache/memoized/calls").c_str(), mode);
 }
 
 /** Lookup path of file descriptor `fd` of process with pid `pid` and put into
@@ -435,7 +441,7 @@ ssize_t lookupPidCwdPath(pid_t pid,
     return ret;
 }
 
-void handleSyscall(pid_t child, Trace& trace)
+void handleSyscall(pid_t child, Traces& traces)
 {
     const long syscall_num = getReg(child, orig_eax);
     assert(errno == 0);
@@ -489,7 +495,7 @@ void handleSyscall(pid_t child, Trace& trace)
                     }
                 }
 
-                trace.doneSyscalls[syscall_num].push_back(path);
+                traces.trace1ByPid[child].doneSyscalls[syscall_num].push_back(path);
 
                 switch (syscall_num)
                 {
@@ -499,19 +505,19 @@ void handleSyscall(pid_t child, Trace& trace)
                     const struct stat stat = readStat(child, pidSyscallArg(child, 1));
                     struct timespec mtime = stat.st_mtim; // modification time
 
-                    trace.pidsByStatPath[Path(path)].insert(child);
+                    traces.trace1ByPid[child].statPaths.insert(path);
 
-                    auto hit = trace.maxTimespecByStatPath.find(Path(path));
-                    if (hit != trace.maxTimespecByStatPath.end()) // if hit
+                    auto hit = traces.trace1ByPid[child].maxTimespecByStatPath.find(path);
+                    if (hit != traces.trace1ByPid[child].maxTimespecByStatPath.end()) // if hit
                     {
-                        if (trace.maxTimespecByStatPath[Path(path)] < mtime) // if more recent
+                        if (traces.trace1ByPid[child].maxTimespecByStatPath[Path(path)] < mtime) // if more recent
                         {
-                            trace.maxTimespecByStatPath[Path(path)] = mtime; // store more recent
+                            traces.trace1ByPid[child].maxTimespecByStatPath[Path(path)] = mtime; // store more recent
                         }
                     }
                     else
                     {
-                        trace.maxTimespecByStatPath[Path(path)] = mtime;
+                        traces.trace1ByPid[child].maxTimespecByStatPath[Path(path)] = mtime;
                     }
 
                     if (show)
@@ -550,12 +556,12 @@ void handleSyscall(pid_t child, Trace& trace)
 
                     if (read_flag)
                     {
-                        trace.pidsByReadPath[Path(path)].insert(child);
+                        traces.trace1ByPid[child].readPaths.insert(path);
                     }
 
                     if (write_flag)
                     {
-                        trace.pidsByWritePath[Path(path)].insert(child);
+                        traces.trace1ByPid[child].writePaths.insert(path);
                     }
 
                     if (show)
@@ -617,7 +623,7 @@ void handleSyscall(pid_t child, Trace& trace)
             else if (syscall_num == SYS_chdir)
             {
                 const Path path = readCxxString(child, pidSyscallArg(child, 0)); // TODO prevent allocation
-                trace.cwdPathByPid[child] = path; // store current cwd
+                traces.trace1ByPid[child].cwdPath;
             }
             else if (syscall_num == SYS_getcwd)
             {
@@ -665,12 +671,8 @@ int doChild(int argc, char **argv)
     return execvp(args[0], args);
 }
 
-int ptraceTopChild(pid_t top_child, Trace& trace)
+int ptraceTopChild(pid_t top_child, Traces& traces)
 {
-    SHA256_Init(&trace.inputHash);
-    // int SHA256_Update(SHA256_CTX *c, const void *data, size_t len);
-    // int SHA256_Final(unsigned char *md, SHA256_CTX *c);
-
     while (true)
     {
         int status;
@@ -713,7 +715,7 @@ int ptraceTopChild(pid_t top_child, Trace& trace)
                 else            // normal case
                 {
                     // fprintf(stderr, "child:%d stopped with signal %ld\n", child, stopsig);
-                    handleSyscall(child, trace);
+                    handleSyscall(child, traces);
                 }
             }
             else
@@ -727,7 +729,7 @@ int ptraceTopChild(pid_t top_child, Trace& trace)
     }
 }
 
-void attachAndPtraceTopChild(pid_t top_child, Trace& trace)
+void attachAndPtraceTopChild(pid_t top_child, Traces& traces)
 {
     const long traceRetVal = ptrace(PTRACE_ATTACH, top_child, NULL, NULL);
     if (traceRetVal == 0)             // success
@@ -747,7 +749,7 @@ void attachAndPtraceTopChild(pid_t top_child, Trace& trace)
                       PTRACE_O_TRACEVFORKDONE);
     ptrace(PTRACE_SETOPTIONS, top_child, NULL, opt);
 
-    ptraceTopChild(top_child, trace);
+    ptraceTopChild(top_child, traces);
 }
 
 bool startsWith(const std::string& whole, const char* part)
@@ -764,7 +766,6 @@ bool isHashableFilePath(const Path& path)
 
 int main(int argc, char* argv[], char* envp[])
 {
-    pid_t child;
     int push = 1;
     int syscall = -1;
 
@@ -810,25 +811,25 @@ int main(int argc, char* argv[], char* envp[])
         push = 3;
     }
 
-    child = fork();
-    if (child == -1)            /* fork failed */
+    const pid_t topChild = fork();
+    if (topChild == -1)            /* fork failed */
     {
         fprintf(stderr, "error: Failed to fork()\n");
-        exit(child);
+        exit(topChild);
     }
 
-    if (child == 0)             /* in the child */
+    if (topChild == 0)             /* in the top child */
     {
         return doChild(argc-push, argv+push);
     }
     else                        /* in the parent */
     {
-        Trace trace;
-        trace.homePath = getenv("HOME");
+        Traces traces;
+        traces.homePath = getenv("HOME");
 
-        assertCacheDirTree(trace);
+        assertCacheDirTree(traces);
 
-        attachAndPtraceTopChild(child, trace);
+        attachAndPtraceTopChild(topChild, traces);
 
         char cwdBuf[PATH_MAX];
         const char* cwd = getcwd(cwdBuf, PATH_MAX);
@@ -839,7 +840,7 @@ int main(int argc, char* argv[], char* envp[])
         // TODO calculate chash from `pwd` `argv` and 'env' used in child
 
         // post process
-        const Path call_file = (trace.homePath + "/.cache/memoized/calls/first.txt");
+        const Path call_file = (traces.homePath + "/.cache/memoized/calls/first.txt");
         FILE* fi = fopen(call_file.c_str(), "wb");
 
         const char* indentation = "    ";
@@ -852,12 +853,13 @@ int main(int argc, char* argv[], char* envp[])
 
         fprintf(fi, "cwd: %s\n", cwd);
 
-        if (!trace.pidsByWritePath.empty())
+        fprintf(fi, "writes:\n");
+        for (auto const& ent : traces.trace1ByPid)
         {
-            fprintf(fi, "writes:\n");
-            for (auto const & ent : trace.pidsByWritePath)
+            // const pid_t child = ent.first;
+            const Trace1& trace1 = ent.second;
+            for (const Path& path : trace1.writePaths)
             {
-                const Path& path = ent.first;
                 if (isHashableFilePath(path))
                 {
                     fprintf(fi, "%s%s\n", indentation, path.c_str());
@@ -865,12 +867,13 @@ int main(int argc, char* argv[], char* envp[])
             }
         }
 
-        if (!trace.pidsByReadPath.empty())
+        fprintf(fi, "reads:\n");
+        for (auto const& ent : traces.trace1ByPid)
         {
-            fprintf(fi, "reads:\n");
-            for (auto const & ent : trace.pidsByReadPath)
+            // const pid_t child = ent.first;
+            const Trace1& trace1 = ent.second;
+            for (const Path& path : trace1.readPaths)
             {
-                const Path& path = ent.first;
                 if (isHashableFilePath(path))
                 {
                     fprintf(fi, "%s%s\n", indentation, path.c_str());
@@ -878,17 +881,18 @@ int main(int argc, char* argv[], char* envp[])
             }
         }
 
-        if (!trace.pidsByStatPath.empty())
+        fprintf(fi, "stats:\n");
+        for (auto const& ent : traces.trace1ByPid)
         {
-            fprintf(fi, "stats:\n");
-            for (auto const & ent : trace.pidsByStatPath)
+            // const pid_t child = ent.first;
+            const Trace1& trace1 = ent.second;
+            for (const Path& path : trace1.statPaths)
             {
-                const Path& path = ent.first;
                 if (isHashableFilePath(path))
                 {
                     fprintf(fi, "%s%s", indentation, path.c_str());
-                    auto hit = trace.maxTimespecByStatPath.find(Path(path));
-                    if (hit != trace.maxTimespecByStatPath.end()) // if hit
+                    auto hit = trace1.maxTimespecByStatPath.find(Path(path));
+                    if (hit != trace1.maxTimespecByStatPath.end()) // if hit
                     {
                         fprintf(fi,
                                 " %ld.%09ld",
