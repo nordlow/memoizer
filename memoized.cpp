@@ -422,6 +422,18 @@ Path buildPath(const Path& a,
     return a + "/" + b;
 }
 
+Path absPath(Traces& traces, pid_t child, const Path& path)
+{
+    if (isAbsolutePath(path))
+    {
+        return path;
+    }
+    else
+    {
+        return buildPath(traces.trace1ByPid[child].cwdPath, path);
+    }
+}
+
 void handleSyscall(pid_t child, Traces& traces)
 {
     const long syscall_num = getReg(child, orig_eax);
@@ -450,13 +462,6 @@ void handleSyscall(pid_t child, Traces& traces)
                 syscall_num == SYS_access) // file system syscalls with path as first argument
             {
                 const Path path = readCxxString(child, pidSyscallArg(child, 0)); // TODO prevent allocation
-
-                const Path& cachedCwdPath = traces.trace1ByPid[child].cwdPath;
-
-                if (!isAbsolutePath(path))
-                {
-                    const Path absPath = buildPath(cachedCwdPath, path);
-                }
 
                 char cwdPath[PATH_MAX];
                 const ssize_t cwdRet = lookupPidCwdPath(child, cwdPath, sizeof(cwdPath));
