@@ -751,7 +751,7 @@ int attachAndPtraceTopChild(pid_t top_child, Traces& traces)
     else
     {
         fprintf(stderr, "error: attach failed with return code %ld\n", traceRetVal);
-        return -1;
+        return -1;              // just signal error
     }
 
     const long opt = (PTRACE_O_EXITKILL |
