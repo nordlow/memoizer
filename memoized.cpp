@@ -472,17 +472,16 @@ Path absPath(Traces& traces, pid_t child, const Path& path)
     else
     {
         const Path cachedCwdPath = traces.trace1ByPid[child].cwdPath;
-        if (!cachedCwdPath.empty()) // if a chdir has been called by child
+        if (!cachedCwdPath.empty()) // if a chdir has been called by child use it
         {
-            if (true)           // TODO only in debug mode
+#ifndef NDEBUG                  // debug {}
+            char trueCwdPath[PATH_MAX];
+            const ssize_t cwdRet = lookupPidCwdPath(child, trueCwdPath, sizeof(trueCwdPath));
+            if (cwdRet >= 0)
             {
-                char trueCwdPath[PATH_MAX];
-                const ssize_t cwdRet = lookupPidCwdPath(child, trueCwdPath, sizeof(trueCwdPath));
-                if (cwdRet >= 0)
-                {
-                    assert(cachedCwdPath == trueCwdPath); // check against current value
-                }
+                assert(cachedCwdPath == trueCwdPath); // check against current value
             }
+#endif
             return buildPath(cachedCwdPath, path);
         }
         else
