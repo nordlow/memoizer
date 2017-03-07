@@ -581,7 +581,18 @@ void handleSyscall(pid_t child, Traces& traces)
                     else
                     {
                         const Path absPath = buildAbsPath(traces, child, path);
-                        traces.trace1ByPid[child].relStatPaths.insert(absPath);
+                        if (startsWith(absPath, traces.topCwdPath.c_str()))
+                        {
+                            const Path relPath = absPath.substr(traces.topCwdPath.size(),
+                                                                absPath.size());
+                            fprintf(stderr, "stat relPath:%s\n", relPath.c_str());
+                            traces.trace1ByPid[child].relStatPaths.insert(relPath);
+                        }
+                        else
+                        {
+                            fprintf(stderr, "stat absPath:%s\n", absPath.c_str());
+                            traces.trace1ByPid[child].absStatPaths.insert(absPath);
+                        }
                     }
 
                     auto hit = traces.trace1ByPid[child].maxTimespecByStatPath.find(path);
