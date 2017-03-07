@@ -1,6 +1,27 @@
 // TODO add check for non-existing PROGRAM in call: ./memoized PROGRAM, for
 // instance when `foo` is given when `./foo` should be given
 
+// TODO http://stackoverflow.com/questions/5649030/how-can-i-easily-compress-and-decompress-files-using-zlib
+
+// TODO
+
+// DECOMPRESS:
+// char buf[1024*1024*16];
+// gzFile *fi = (gzFile *)gzopen("file.gz","rb");
+// gzrewind(fi);
+// while(!gzeof(fi))
+// {
+//     int len = gzread(fi,buf,sizeof(buf));
+//         //buf contains len bytes of decompressed data
+// }
+// gzclose(fi);
+// For compression
+
+// COMPRESS
+// gzFile *fi = (gzFile *)gzopen("file.gz","wb");
+// gzwrite(fi,"my decompressed data",strlen("my decompressed data"));
+// gzclose(fi);
+
 #include <sys/ptrace.h>
 #include <bits/types.h>
 #include <sys/user.h>
