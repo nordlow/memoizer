@@ -982,29 +982,29 @@ int main(int argc, char* argv[], char* envp[])
         for (auto const& ent : traces.trace1ByPid)
         {
             const Trace1& trace1 = ent.second;
-            for (auto const& writePath : trace1.absWritePaths)
+            for (auto const& path : trace1.absWritePaths)
             {
-                allAbsWritePaths.insert(writePath);
+                allAbsWritePaths.insert(path);
             }
-            for (auto const& absReadPath : trace1.absReadPaths)
+            for (auto const& path : trace1.absReadPaths)
             {
-                allAbsReadPaths.insert(absReadPath);
+                allAbsReadPaths.insert(path);
             }
-            for (auto const& statPath : trace1.absStatPaths)
+            for (auto const& path : trace1.absStatPaths)
             {
-                allAbsStatPaths.insert(statPath);
+                allAbsStatPaths.insert(path);
             }
-            for (auto const& writePath : trace1.relWritePaths)
+            for (auto const& path : trace1.relWritePaths)
             {
-                allRelWritePaths.insert(writePath);
+                allRelWritePaths.insert(path);
             }
-            for (auto const& relReadPath : trace1.relReadPaths)
+            for (auto const& path : trace1.relReadPaths)
             {
-                allRelReadPaths.insert(relReadPath);
+                allRelReadPaths.insert(path);
             }
-            for (auto const& statPath : trace1.relStatPaths)
+            for (auto const& path : trace1.relStatPaths)
             {
-                allRelStatPaths.insert(statPath);
+                allRelStatPaths.insert(path);
             }
         }
 
