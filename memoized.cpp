@@ -458,9 +458,9 @@ Path buildPath(const Path& a,
     return a + "/" + b;
 }
 
-void dln(const char *str)
+void dln(const char* hint, const char *str)
 {
-    fprintf(stderr, "memoized: debug: %s\n", str);
+    fprintf(stderr, "memoized: debug: %s:%s\n", hint, str);
 }
 
 Path absPath(Traces& traces, pid_t child, const Path& path)
@@ -489,7 +489,7 @@ Path absPath(Traces& traces, pid_t child, const Path& path)
             char trueCwdPath[PATH_MAX];
             const ssize_t cwdRet = lookupPidCwdPath(child, trueCwdPath, sizeof(trueCwdPath));
             assert(cwdRet >= 0);
-            return buildPath(cachedCwdPath, trueCwdPath);
+            return buildPath(trueCwdPath, path);
         }
     }
 }
