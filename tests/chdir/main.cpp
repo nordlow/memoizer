@@ -1,6 +1,7 @@
 #include <string>
 #include <cassert>
 #include <cstdio>
+#include <cstring>
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -11,6 +12,8 @@ int main(int argc, const char * argv[], const char * envp[])
 {
     {
         const int new_fd = open("test_output", O_WRONLY | O_CREAT | O_TRUNC, 0777);
+        const char* text = "Some output\n";
+        write(new_fd, text, strlen(text));
         assert(new_fd);
         assert(close(new_fd) >= 0);
     }
