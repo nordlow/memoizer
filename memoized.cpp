@@ -990,6 +990,7 @@ int SHA256_Digest_File(const char* path,
     return 0;
 }
 
+// TODO handle abrupt termination by first writing to temporary and then moving it cache atomically
 void compressToCache(const Traces& traces, const Path& sourcePath)
 {
     char digestHexStringBuf[2*SHA256_DIGEST_LENGTH + 1];
