@@ -668,6 +668,7 @@ void handleSyscall(pid_t child, Traces& traces)
 
                     if (read_flag)
                     {
+                        // TODO functionize:
                         if (isAbsolutePath(path))
                         {
                             traces.trace1ByPid[child].absReadPaths.insert(path);
@@ -692,6 +693,7 @@ void handleSyscall(pid_t child, Traces& traces)
 
                     if (write_flag)
                     {
+                        // TODO functionize:
                         if (isAbsolutePath(path))
                         {
                             traces.trace1ByPid[child].absWritePaths.insert(path);
