@@ -992,34 +992,36 @@ int SHA256_Digest_File(const char* path,
 
 void compressToCache(const Traces& traces, const Path& sourcePath)
 {
-    FILE* source = fopen(sourcePath.c_str(), "r");
-    assert(source);
-
-    // SHA-256
     char digestHexStringBuf[2*SHA256_DIGEST_LENGTH + 1];
     assert(SHA256_Digest_File(sourcePath.c_str(), digestHexStringBuf) >= 0);
 
     const Path destPath = getArtifactPath(traces, digestHexStringBuf, "z");
 
-    FILE* dest = fopen(destPath.c_str(), "w+");
-    assert(dest);
+    if (access(destPath.c_str(), F_OK) == -1) // if fname doesn't exit
+    {
+        if (true)
+        {
+            fprintf(stderr,
+                    "memoized: compressing artifact `%s` to `%s` ... ",
+                    sourcePath.c_str(),
+                    destPath.c_str());
+            fflush(stderr);
+        }
 
-    if (show)
-    {
-        fprintf(stderr,
-                "memoized: compressing artifact `%s` to `%s` ... ",
-                sourcePath.c_str(),
-                destPath.c_str());
-        fflush(stderr);
-    }
-    if (show)
-    {
+        FILE* dest = fopen(destPath.c_str(), "w+");
+        assert(dest);
+
+        FILE* source = fopen(sourcePath.c_str(), "r");
+        assert(source);
         z_compress(source, dest, Z_DEFAULT_COMPRESSION);
-        fprintf(stderr, "done\n");
-    }
+        fclose(source);
+        fclose(dest);
 
-    fclose(source);
-    fclose(dest);
+        if (true)
+        {
+            fprintf(stderr, "done\n");
+        }
+    }
 }
 
 int main(int argc, char* argv[], char* envp[])
