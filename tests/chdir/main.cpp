@@ -17,6 +17,7 @@ int main(int argc, const char * argv[], const char * envp[])
 {
     const int new_fd = open("output", O_WRONLY | O_CREAT | O_TRUNC, 0777);
     assert(new_fd);
+    assert(close(new_fd) >= 0);
 
     const int main_fd = open("main.cpp", O_RDONLY);
     assert(main_fd);
