@@ -1,10 +1,10 @@
 // TODO add check for non-existing PROGRAM in call: ./memoized PROGRAM, for
 // instance when `foo` is given when `./foo` should be given
 
-// TODO http://stackoverflow.com/questions/5649030/how-can-i-easily-compress-and-decompress-files-using-zlib
-
 // TODO write to cache with z_compress()
 // TODO read from cache with z_decompress()
+
+// TODO Alternatively use http://stackoverflow.com/questions/5649030/how-can-i-easily-compress-and-decompress-files-using-zlib
 
 // DECOMPRESS:
 // char buf[1024*1024*16];
