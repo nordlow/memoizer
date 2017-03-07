@@ -777,7 +777,7 @@ void handleSyscall(pid_t child, Traces& traces)
             {
                 if (false)
                 {
-                    fprintf(stderr, "TODO handle system call fstat()\n");
+                    fprintf(stderr, "memoized: TODO handle system call fstat()\n");
                 }
             }
             else if (syscall_num == SYS_chdir)
@@ -799,7 +799,7 @@ void handleSyscall(pid_t child, Traces& traces)
             }
             else
             {
-                // fprintf(stderr, "syscall_num:%d\n", syscall_num);
+                // fprintf(stderr, "memoized: syscall_num:%d\n", syscall_num);
                 // printSyscall(child, syscall_num, retval);
                 // endl(stderr);
                 // endl(stderr);
@@ -876,7 +876,7 @@ int ptraceTopChild(pid_t topChild, Traces& traces)
                 const long stopsig = WSTOPSIG(status);
                 if (stopsig & 0x80) // highest bit set
                 {
-                    fprintf(stderr, "child:%d TODO handle highest bit set\n", child);
+                    fprintf(stderr, "memoized: child:%d TODO handle highest bit set\n", child);
                 }
                 else            // normal case
                 {
@@ -886,7 +886,7 @@ int ptraceTopChild(pid_t topChild, Traces& traces)
             }
             else
             {
-                fprintf(stderr, "child:%d TODO handle other status:%d\n", child, status);
+                fprintf(stderr, "memoized: child:%d TODO handle other status:%d\n", child, status);
             }
             break;
         }
@@ -906,16 +906,16 @@ int tryAttachToPid(pid_t child)
         {
             if (show)
             {
-                fprintf(stderr, "memoized: info: attached to child with pid=%d\n", child);
+                fprintf(stderr, "memoized: memoized: info: attached to child with pid=%d\n", child);
             }
             goto ok;
         }
         else
         {
-            fprintf(stderr, "warning: attach failed with return code %ld\n", traceRetVal);
+            fprintf(stderr, "memoized: warning: attach failed with return code %ld\n", traceRetVal);
         }
     }
-    fprintf(stderr, "error: attach failed %d times\n", tryCountMax);
+    fprintf(stderr, "memoized: error: attach failed %d times\n", tryCountMax);
     return -1;
 ok:
     return 0;
@@ -1001,7 +1001,10 @@ void compressToCache(const Traces& traces, const Path& sourcePath)
 
     const Path destPath = getArtifactPath(traces, digestHexStringBuf, "z");
 
-    fprintf(stderr, "Writing compressed artifact %s\n", destPath.c_str());
+    fprintf(stderr,
+            "memoized: Compressing artifact %s to %s\n",
+            sourcePath.c_str(),
+            destPath.c_str());
     FILE* dest = fopen(destPath.c_str(), "w+");
     assert(dest);
 
@@ -1026,7 +1029,7 @@ int main(int argc, char* argv[], char* envp[])
         syscall = atoi(argv[2]);
         if (syscall > MAX_SYSCALL_NUM || syscall < 0)
         {
-            fprintf(stderr, "error: %s is an invalid syscall\n", argv[2]);
+            fprintf(stderr, "memoized: error: %s is an invalid syscall\n", argv[2]);
             exit(1);
         }
         push = 3;
@@ -1050,7 +1053,7 @@ int main(int argc, char* argv[], char* envp[])
 
         if (syscall == -1)
         {
-            fprintf(stderr, "error: %s is an invalid syscall\n", argv[2]);
+            fprintf(stderr, "memoized: error: %s is an invalid syscall\n", argv[2]);
             exit(1);
         }
 
@@ -1060,7 +1063,7 @@ int main(int argc, char* argv[], char* envp[])
     const pid_t topChild = fork();
     if (topChild == -1)            /* fork failed */
     {
-        fprintf(stderr, "error: Failed to fork()\n");
+        fprintf(stderr, "memoized: error: Failed to fork()\n");
         exit(topChild);
     }
 
