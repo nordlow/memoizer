@@ -1,10 +1,6 @@
 // TODO add check for non-existing PROGRAM in call: ./memoized PROGRAM, for
 // instance when `foo` is given when `./foo` should be given
 
-// TODO
-// - add flag --no-env= to skip environment
-// - add flag --set-env= to set environment
-
 #include <sys/ptrace.h>
 #include <bits/types.h>
 #include <sys/user.h>
@@ -166,10 +162,37 @@ struct Trace1
 struct Traces
 {
     Path homePath;
+    Path topCwdPath;            // cwd path of top child
 
     /// Traces by process `pid_t`.
     std::unordered_map<pid_t, Trace1> trace1ByPid;
 };
+
+bool startsWith(const std::string& whole, const char* part)
+{
+    return whole.find(part) == 0;
+}
+
+bool isHashableFilePath(const Path& path)
+{
+    return (path != "/tmp" &&
+            (!startsWith(path, "/tmp/")) &&
+            (!startsWith(path, "/dev/urandom")));
+}
+
+template<typename T>
+std::vector<T> toSortedVector(const std::unordered_set<T>& uset)
+{
+    std::vector<T> vec(uset.begin(), uset.end());
+    std::sort(vec.begin(), vec.end());
+    return vec;
+}
+
+void gitShowRemoteOrigin()
+{
+    const auto execString = exec("git remote show origin");
+    fprintf(stdout, "%s", execString.c_str());
+}
 
 const char *syscallNameOfNumber(int syscallNumber)
 {
@@ -615,7 +638,18 @@ void handleSyscall(pid_t child, Traces& traces)
                         else
                         {
                             const Path absPath = buildAbsPath(traces, child, path);
-                            traces.trace1ByPid[child].relReadPaths.insert(absPath);
+                            if (startsWith(absPath, traces.topCwdPath.c_str()))
+                            {
+                                const Path relPath = absPath.substr(traces.topCwdPath.size(),
+                                                                    absPath.size());
+                                fprintf(stderr, "read relPath:%s\n", relPath.c_str());
+                                traces.trace1ByPid[child].relReadPaths.insert(relPath);
+                            }
+                            else
+                            {
+                                fprintf(stderr, "read absPath:%s\n", absPath.c_str());
+                                traces.trace1ByPid[child].absReadPaths.insert(absPath);
+                            }
                         }
                     }
 
@@ -628,7 +662,18 @@ void handleSyscall(pid_t child, Traces& traces)
                         else
                         {
                             const Path absPath = buildAbsPath(traces, child, path);
-                            traces.trace1ByPid[child].relWritePaths.insert(absPath);
+                            if (startsWith(absPath, traces.topCwdPath.c_str()))
+                            {
+                                const Path relPath = absPath.substr(traces.topCwdPath.size(),
+                                                                    absPath.size());
+                                fprintf(stderr, "write relPath:%s\n", relPath.c_str());
+                                traces.trace1ByPid[child].relWritePaths.insert(relPath);
+                            }
+                            else
+                            {
+                                fprintf(stderr, "write absPath:%s\n", absPath.c_str());
+                                traces.trace1ByPid[child].absWritePaths.insert(absPath);
+                            }
                         }
                     }
 
@@ -847,32 +892,6 @@ int attachAndPtraceTopChild(Traces& traces, pid_t topChild)
     return 0;
 }
 
-bool startsWith(const std::string& whole, const char* part)
-{
-    return whole.find(part) == 0;
-}
-
-bool isHashableFilePath(const Path& path)
-{
-    return (path != "/tmp" &&
-            (!startsWith(path, "/tmp/")) &&
-            (!startsWith(path, "/dev/urandom")));
-}
-
-template<typename T>
-std::vector<T> toSortedVector(const std::unordered_set<T>& uset)
-{
-    std::vector<T> vec(uset.begin(), uset.end());
-    std::sort(vec.begin(), vec.end());
-    return vec;
-}
-
-void gitShowRemoteOrigin()
-{
-    const auto execString = exec("git remote show origin");
-    fprintf(stdout, "%s", execString.c_str());
-}
-
 int main(int argc, char* argv[], char* envp[])
 {
     int push = 1;
@@ -936,6 +955,13 @@ int main(int argc, char* argv[], char* envp[])
         Traces traces;
         traces.homePath = getenv("HOME");
 
+        char cwdBuf[PATH_MAX];
+        const char* cwd = getcwd(cwdBuf, PATH_MAX);
+        traces.topCwdPath = cwd;
+
+        std::string progPath = argv[0];
+        std::string progAbsPath = cwd + ("/" + progPath);
+
         const int attachRetVal = attachAndPtraceTopChild(traces, topChild);
         if (attachRetVal < 0)
         {
@@ -943,13 +969,6 @@ int main(int argc, char* argv[], char* envp[])
         }
 
         assertCacheDirTree(traces);
-
-        char cwdBuf[PATH_MAX];
-        const char* cwd = getcwd(cwdBuf, PATH_MAX);
-        assert(cwd);
-
-        std::string progPath = argv[0];
-        std::string progAbsPath = cwd + ("/" + progPath);
 
         // TODO calculate chash from `pwd` `argv` and 'env' used in child
 
