@@ -459,9 +459,10 @@ void assertCacheDirTree(Traces& traces)
 
 /// Create tree cache directories if it doesn't exist.
 Path getArtifactPath(const Traces& traces,
-                     const char *filePath)
+                     const char* filePath,
+                     const char* fileExtension)
 {
-    return traces.homePath + "/.cache/memoized/artifacts" + "/" + filePath;
+    return traces.homePath + "/.cache/memoized/artifacts" + "/" + filePath + "." + fileExtension;
 }
 
 /** Lookup path of file descriptor `fd` of process with pid `pid` and put into
@@ -997,7 +998,7 @@ void compressToCache(const Traces& traces, const Path& sourcePath)
     char digestHexStringBuf[2*SHA256_DIGEST_LENGTH + 1];
     assert(SHA256_Digest_File(sourcePath.c_str(), digestHexStringBuf) >= 0);
 
-    const Path destPath = getArtifactPath(traces, digestHexStringBuf);
+    const Path destPath = getArtifactPath(traces, digestHexStringBuf, "gz");
 
     fprintf(stderr, "destPath:%s\n", destPath.c_str());
     FILE* dest = fopen(destPath.c_str(), "w+");
