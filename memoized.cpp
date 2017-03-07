@@ -463,34 +463,27 @@ void dln(const char* hint, const char *str)
     fprintf(stderr, "memoized: debug: %s:%s\n", hint, str);
 }
 
-Path absPath(Traces& traces, pid_t child, const Path& path)
+Path buildAbsPath(Traces& traces, pid_t child, const Path& path)
 {
-    if (isAbsolutePath(path))
+    const Path cachedCwdPath = traces.trace1ByPid[child].cwdPath;
+    if (!cachedCwdPath.empty()) // if a chdir has been called by child use it
     {
-        return path;
+#ifndef NDEBUG                  // debug {}
+        char trueCwdPath[PATH_MAX];
+        const ssize_t cwdRet = lookupPidCwdPath(child, trueCwdPath, sizeof(trueCwdPath));
+        if (cwdRet >= 0)
+        {
+            assert(cachedCwdPath == trueCwdPath); // check against current value
+        }
+#endif
+        return buildPath(cachedCwdPath, path);
     }
     else
     {
-        const Path cachedCwdPath = traces.trace1ByPid[child].cwdPath;
-        if (!cachedCwdPath.empty()) // if a chdir has been called by child use it
-        {
-#ifndef NDEBUG                  // debug {}
-            char trueCwdPath[PATH_MAX];
-            const ssize_t cwdRet = lookupPidCwdPath(child, trueCwdPath, sizeof(trueCwdPath));
-            if (cwdRet >= 0)
-            {
-                assert(cachedCwdPath == trueCwdPath); // check against current value
-            }
-#endif
-            return buildPath(cachedCwdPath, path);
-        }
-        else
-        {
-            char trueCwdPath[PATH_MAX];
-            const ssize_t cwdRet = lookupPidCwdPath(child, trueCwdPath, sizeof(trueCwdPath));
-            assert(cwdRet >= 0);
-            return buildPath(trueCwdPath, path);
-        }
+        char trueCwdPath[PATH_MAX];
+        const ssize_t cwdRet = lookupPidCwdPath(child, trueCwdPath, sizeof(trueCwdPath));
+        assert(cwdRet >= 0);
+        return buildPath(trueCwdPath, path);
     }
 }
 
@@ -558,7 +551,7 @@ void handleSyscall(pid_t child, Traces& traces)
                     }
                     else
                     {
-                        traces.trace1ByPid[child].relStatPaths.insert(absPath(traces, child, path));
+                        traces.trace1ByPid[child].relStatPaths.insert(buildAbsPath(traces, child, path));
                     }
 
                     auto hit = traces.trace1ByPid[child].maxTimespecByStatPath.find(path);
@@ -616,7 +609,7 @@ void handleSyscall(pid_t child, Traces& traces)
                         }
                         else
                         {
-                            traces.trace1ByPid[child].relReadPaths.insert(absPath(traces, child, path));
+                            traces.trace1ByPid[child].relReadPaths.insert(buildAbsPath(traces, child, path));
                         }
                     }
 
@@ -628,7 +621,7 @@ void handleSyscall(pid_t child, Traces& traces)
                         }
                         else
                         {
-                            traces.trace1ByPid[child].relWritePaths.insert(absPath(traces, child, path));
+                            traces.trace1ByPid[child].relWritePaths.insert(buildAbsPath(traces, child, path));
                         }
                     }
 
