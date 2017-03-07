@@ -500,8 +500,8 @@ Path buildAbsPath(Traces& traces, pid_t child, const Path& path)
         const ssize_t cwdRet = lookupPidCwdPath(child, trueCwdPath, sizeof(trueCwdPath));
         if (cwdRet >= 0)
         {
-            fprintf(stderr, "cachedCwdPath:%s\n", cachedCwdPath.c_str());
-            fprintf(stderr, "trueCwdPath:%s\n", trueCwdPath);
+            // fprintf(stderr, "cachedCwdPath:%s\n", cachedCwdPath.c_str());
+            // fprintf(stderr, "trueCwdPath:%s\n", trueCwdPath);
             assert(cachedCwdPath == trueCwdPath); // check against current value
         }
 #endif
