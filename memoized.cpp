@@ -551,7 +551,8 @@ void handleSyscall(pid_t child, Traces& traces)
                     }
                     else
                     {
-                        traces.trace1ByPid[child].relStatPaths.insert(buildAbsPath(traces, child, path));
+                        const Path absPath = buildAbsPath(traces, child, path);
+                        traces.trace1ByPid[child].relStatPaths.insert(absPath);
                     }
 
                     auto hit = traces.trace1ByPid[child].maxTimespecByStatPath.find(path);
@@ -609,7 +610,8 @@ void handleSyscall(pid_t child, Traces& traces)
                         }
                         else
                         {
-                            traces.trace1ByPid[child].relReadPaths.insert(buildAbsPath(traces, child, path));
+                            const Path absPath = buildAbsPath(traces, child, path);
+                            traces.trace1ByPid[child].relReadPaths.insert(absPath);
                         }
                     }
 
@@ -621,7 +623,8 @@ void handleSyscall(pid_t child, Traces& traces)
                         }
                         else
                         {
-                            traces.trace1ByPid[child].relWritePaths.insert(buildAbsPath(traces, child, path));
+                            const Path absPath = buildAbsPath(traces, child, path);
+                            traces.trace1ByPid[child].relWritePaths.insert(absPath);
                         }
                     }
 
