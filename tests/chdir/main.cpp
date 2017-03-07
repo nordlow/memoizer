@@ -21,6 +21,9 @@ int main(int argc, const char * argv[], const char * envp[])
 
     struct stat st;
     assert(stat("passwd", &st) == 0);
+    assert(st.st_mtime);
+    assert(st.st_ctime);
+    assert(st.st_atime);
 
     const int passwd_fd = open("passwd", O_RDONLY);
     assert(passwd_fd);
