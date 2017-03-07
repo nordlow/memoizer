@@ -970,6 +970,8 @@ int main(int argc, char* argv[], char* envp[])
 
         fprintf(fi, "cwd: %s\n", cwd);
 
+        bool first = true;
+
         // collect all paths
         PathOSet allAbsWritePaths;
         PathOSet allAbsReadPaths;
@@ -1006,28 +1008,27 @@ int main(int argc, char* argv[], char* envp[])
             }
         }
 
-        if (!allRelWritePaths.empty())
+        first = true;
+        for (const Path& path : allRelWritePaths)
         {
-            fprintf(fi, "relative writes:\n");
-            for (const Path& path : allRelWritePaths)
+            if (isHashableFilePath(path))
             {
-                if (isHashableFilePath(path))
-                {
-                    fprintf(fi, "%s%s\n", indentation, path.c_str());
-                }
+                if (first) { fprintf(fi, "relative writes:\n"); first = false; }
+                fprintf(fi, "%s%s\n", indentation, path.c_str());
             }
         }
-        if (!allRelReadPaths.empty())
+        first = true;
+
+        for (const Path& path : allRelReadPaths)
         {
-            fprintf(fi, "relative reads:\n");
-            for (const Path& path : allRelReadPaths)
+            if (isHashableFilePath(path))
             {
-                if (isHashableFilePath(path))
-                {
-                    fprintf(fi, "%s%s\n", indentation, path.c_str());
-                }
+                if (first) { fprintf(fi, "relative reads:\n"); first = false; }
+                fprintf(fi, "%s%s\n", indentation, path.c_str());
             }
         }
+
+        first = true;
         if (!allRelStatPaths.empty())
         {
             fprintf(fi, "relative stats:\n");
@@ -1054,28 +1055,27 @@ int main(int argc, char* argv[], char* envp[])
             }
         }
 
-        if (!allAbsWritePaths.empty())
+        first = true;
+        for (const Path& path : allAbsWritePaths)
         {
-            fprintf(fi, "absolute writes:\n");
-            for (const Path& path : allAbsWritePaths)
+            if (isHashableFilePath(path))
             {
-                if (isHashableFilePath(path))
-                {
-                    fprintf(fi, "%s%s\n", indentation, path.c_str());
-                }
+                if (first) { fprintf(fi, "absolute writes:\n"); first = false; }
+                fprintf(fi, "%s%s\n", indentation, path.c_str());
             }
         }
-        if (!allAbsWritePaths.empty())
+
+        first = true;
+        for (const Path& path : allAbsReadPaths)
         {
-            fprintf(fi, "absolute reads:\n");
-            for (const Path& path : allAbsReadPaths)
+            if (isHashableFilePath(path))
             {
-                if (isHashableFilePath(path))
-                {
-                    fprintf(fi, "%s%s\n", indentation, path.c_str());
-                }
+                if (first) { fprintf(fi, "absolute reads:\n"); first = false; }
+                fprintf(fi, "%s%s\n", indentation, path.c_str());
             }
         }
+
+        first = true;
         if (!allAbsStatPaths.empty())
         {
             fprintf(fi, "absolute stats:\n");
