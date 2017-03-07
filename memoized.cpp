@@ -3,7 +3,8 @@
 
 // TODO http://stackoverflow.com/questions/5649030/how-can-i-easily-compress-and-decompress-files-using-zlib
 
-// TODO
+// TODO write to cache with z_compress()
+// TODO read from cache with z_decompress()
 
 // DECOMPRESS:
 // char buf[1024*1024*16];
