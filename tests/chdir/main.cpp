@@ -15,13 +15,21 @@ using std::dec;
 
 int main(int argc, const char * argv[], const char * envp[])
 {
+    const int new_fd = open("output", O_WRONLY | O_CREAT | O_TRUNC, 0777);
+    assert(new_fd);
+
+    const int main_fd = open("main.cpp", O_RDONLY);
+    assert(main_fd);
+    assert(close(main_fd) >= 0);
+
     chdir("/etc");
 
     struct stat st;
     assert(stat("passwd", &st) == 0);
 
-    const int fd = open("passwd", O_RDONLY);
-    assert(fd);
+    const int passwd_fd = open("passwd", O_RDONLY);
+    assert(passwd_fd);
+    assert(close(passwd_fd) >= 0);
 
     printf("All ok!\n");
 
