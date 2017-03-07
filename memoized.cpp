@@ -73,7 +73,7 @@ std::string exec(const char* cmd)
 
 #define getReg(child, name) __get_reg(child, offsetof(struct user, regs.name))
 
-const bool show = true;
+const bool show = false;
 
 long __get_reg(pid_t child, int off)
 {
