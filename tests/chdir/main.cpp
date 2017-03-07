@@ -8,11 +8,6 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-using std::cout;
-using std::endl;
-using std::hex;
-using std::dec;
-
 int main(int argc, const char * argv[], const char * envp[])
 {
     const int new_fd = open("test_output", O_WRONLY | O_CREAT | O_TRUNC, 0777);
