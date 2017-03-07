@@ -14,7 +14,7 @@ all: memoized
 syscallents.h: $(GEN_TABLES)
 	$(GEN_TABLES) $(LINUX_SRC)
 
-memoized: memoized.cpp syscalls.h syscallents.h Makefile zpipe.o
+memoized: memoized.cpp syscalls.h syscallents.h zpipe.o Makefile
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $< zpipe.o
 zpipe.o: zpipe.c Makefile
 	$(CC) -c $(CFLAGS) -o $@ $<
