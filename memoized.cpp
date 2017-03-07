@@ -583,7 +583,7 @@ void handleSyscall(pid_t child, Traces& traces)
                         const Path absPath = buildAbsPath(traces, child, path);
                         if (startsWith(absPath, traces.topCwdPath.c_str()))
                         {
-                            const Path relPath = absPath.substr(traces.topCwdPath.size(),
+                            const Path relPath = absPath.substr(traces.topCwdPath.size() + 1,
                                                                 absPath.size());
                             fprintf(stderr, "stat relPath:%s\n", relPath.c_str());
                             traces.trace1ByPid[child].relStatPaths.insert(relPath);
@@ -653,7 +653,7 @@ void handleSyscall(pid_t child, Traces& traces)
                             const Path absPath = buildAbsPath(traces, child, path);
                             if (startsWith(absPath, traces.topCwdPath.c_str()))
                             {
-                                const Path relPath = absPath.substr(traces.topCwdPath.size(),
+                                const Path relPath = absPath.substr(traces.topCwdPath.size() + 1,
                                                                     absPath.size());
                                 fprintf(stderr, "read relPath:%s\n", relPath.c_str());
                                 traces.trace1ByPid[child].relReadPaths.insert(relPath);
@@ -677,7 +677,7 @@ void handleSyscall(pid_t child, Traces& traces)
                             const Path absPath = buildAbsPath(traces, child, path);
                             if (startsWith(absPath, traces.topCwdPath.c_str()))
                             {
-                                const Path relPath = absPath.substr(traces.topCwdPath.size(),
+                                const Path relPath = absPath.substr(traces.topCwdPath.size() + 1,
                                                                     absPath.size());
                                 fprintf(stderr, "write relPath:%s\n", relPath.c_str());
                                 traces.trace1ByPid[child].relWritePaths.insert(relPath);
