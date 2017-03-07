@@ -970,7 +970,7 @@ int main(int argc, char* argv[], char* envp[])
 
         fprintf(fi, "cwd: %s\n", cwd);
 
-        bool first = true;
+        bool first = false;
 
         // collect all paths
         PathOSet allAbsWritePaths;
@@ -1017,8 +1017,8 @@ int main(int argc, char* argv[], char* envp[])
                 fprintf(fi, "%s%s\n", indentation, path.c_str());
             }
         }
-        first = true;
 
+        first = true;
         for (const Path& path : allRelReadPaths)
         {
             if (isHashableFilePath(path))
@@ -1029,28 +1029,25 @@ int main(int argc, char* argv[], char* envp[])
         }
 
         first = true;
-        if (!allRelStatPaths.empty())
+        for (auto const& ent : traces.trace1ByPid)
         {
-            fprintf(fi, "relative stats:\n");
-            for (auto const& ent : traces.trace1ByPid)
+            // const pid_t child = ent.first;
+            const Trace1& trace1 = ent.second;
+            for (const Path& path : toSortedVector(trace1.relStatPaths))
             {
-                // const pid_t child = ent.first;
-                const Trace1& trace1 = ent.second;
-                for (const Path& path : toSortedVector(trace1.relStatPaths))
+                if (isHashableFilePath(path))
                 {
-                    if (isHashableFilePath(path))
+                    if (first) { fprintf(fi, "relative stats:\n"); first = false; }
+                    fprintf(fi, "%s%s", indentation, path.c_str());
+                    auto hit = trace1.maxTimespecByStatPath.find(Path(path));
+                    if (hit != trace1.maxTimespecByStatPath.end()) // if hit
                     {
-                        fprintf(fi, "%s%s", indentation, path.c_str());
-                        auto hit = trace1.maxTimespecByStatPath.find(Path(path));
-                        if (hit != trace1.maxTimespecByStatPath.end()) // if hit
-                        {
-                            fprintf(fi,
-                                    " %ld.%09ld",
-                                    hit->second.tv_sec,
-                                    hit->second.tv_nsec);
-                        }
-                        endl(fi);
+                        fprintf(fi,
+                                " %ld.%09ld",
+                                hit->second.tv_sec,
+                                hit->second.tv_nsec);
                     }
+                    endl(fi);
                 }
             }
         }
@@ -1076,28 +1073,25 @@ int main(int argc, char* argv[], char* envp[])
         }
 
         first = true;
-        if (!allAbsStatPaths.empty())
+        for (auto const& ent : traces.trace1ByPid)
         {
-            fprintf(fi, "absolute stats:\n");
-            for (auto const& ent : traces.trace1ByPid)
+            // const pid_t child = ent.first;
+            const Trace1& trace1 = ent.second;
+            for (const Path& path : toSortedVector(trace1.absStatPaths))
             {
-                // const pid_t child = ent.first;
-                const Trace1& trace1 = ent.second;
-                for (const Path& path : toSortedVector(trace1.absStatPaths))
+                if (isHashableFilePath(path))
                 {
-                    if (isHashableFilePath(path))
+                    if (first) { fprintf(fi, "absolutes stats:\n"); first = false; }
+                    fprintf(fi, "%s%s", indentation, path.c_str());
+                    auto hit = trace1.maxTimespecByStatPath.find(Path(path));
+                    if (hit != trace1.maxTimespecByStatPath.end()) // if hit
                     {
-                        fprintf(fi, "%s%s", indentation, path.c_str());
-                        auto hit = trace1.maxTimespecByStatPath.find(Path(path));
-                        if (hit != trace1.maxTimespecByStatPath.end()) // if hit
-                        {
-                            fprintf(fi,
-                                    " %ld.%09ld",
-                                    hit->second.tv_sec,
-                                    hit->second.tv_nsec);
-                        }
-                        endl(fi);
+                        fprintf(fi,
+                                " %ld.%09ld",
+                                hit->second.tv_sec,
+                                hit->second.tv_nsec);
                     }
+                    endl(fi);
                 }
             }
         }
