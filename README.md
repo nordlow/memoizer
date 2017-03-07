@@ -32,6 +32,6 @@ Assert read and writes from specific set of directories:
 
 Environment control:
 
-- `--no-env`
+- `--skip-env`
 - `--set-env=...`
 - `--use-env-vars=PATH,..`
