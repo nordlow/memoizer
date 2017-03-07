@@ -1081,7 +1081,7 @@ int main(int argc, char* argv[], char* envp[])
             {
                 if (isHashableFilePath(path))
                 {
-                    if (first) { fprintf(fi, "absolutes stats:\n"); first = false; }
+                    if (first) { fprintf(fi, "absolute stats:\n"); first = false; }
                     fprintf(fi, "%s%s", indentation, path.c_str());
                     auto hit = trace1.maxTimespecByStatPath.find(Path(path));
                     if (hit != trace1.maxTimespecByStatPath.end()) // if hit
