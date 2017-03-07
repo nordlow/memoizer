@@ -29,3 +29,9 @@ Assert read and writes from specific set of directories:
 
 - `--only-reads-from=DIRS`
 - `--only-writes-to=DIRS`
+
+Environment control:
+
+- `--no-env`
+- `--set-env=...`
+- `--use-env-vars=PATH,..`
