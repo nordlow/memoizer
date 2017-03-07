@@ -734,7 +734,7 @@ int doChild(int argc, char **argv)
     {
         fprintf(stderr, "memoized: info: execvp:%s\n", args[0]);
     }
-    kill(getpid(), SIGSTOP);    // stop it directly
+    kill(getpid(), SIGSTOP);    // stop it directly before executions starts
 
     return execvp(args[0], args);
 }
