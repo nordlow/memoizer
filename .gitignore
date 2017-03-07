@@ -4,3 +4,4 @@ syscallents.d
 ministrace.o
 a.out
 *~
+*.o
