@@ -1004,13 +1004,19 @@ void compressToCache(const Traces& traces, const Path& sourcePath)
     FILE* dest = fopen(destPath.c_str(), "w+");
     assert(dest);
 
-    fprintf(stderr,
-            "memoized: compressing artifact `%s` to `%s` ... ",
-            sourcePath.c_str(),
-            destPath.c_str());
-    fflush(stderr);
-    z_compress(source, dest, Z_DEFAULT_COMPRESSION);
-    fprintf(stderr, "done\n");
+    if (show)
+    {
+        fprintf(stderr,
+                "memoized: compressing artifact `%s` to `%s` ... ",
+                sourcePath.c_str(),
+                destPath.c_str());
+        fflush(stderr);
+    }
+    if (show)
+    {
+        z_compress(source, dest, Z_DEFAULT_COMPRESSION);
+        fprintf(stderr, "done\n");
+    }
 
     fclose(source);
     fclose(dest);
