@@ -457,6 +457,13 @@ void assertCacheDirTree(Traces& traces)
     mkdir((traces.homePath + "/.cache/memoized/calls").c_str(), mode);
 }
 
+/// Create tree cache directories if it doesn't exist.
+Path getArtifactPath(const Traces& traces,
+                     const char *filePath)
+{
+    return traces.homePath + "/.cache/memoized/artifacts" + "/" + filePath;
+}
+
 /** Lookup path of file descriptor `fd` of process with pid `pid` and put into
     `linkDestPath`.
 
@@ -931,6 +938,75 @@ int attachAndPtraceTopChild(Traces& traces, pid_t topChild)
     return 0;
 }
 
+void SHA256_hashString(const unsigned char hash[SHA256_DIGEST_LENGTH],
+                       char digestHexStringBuf[2*SHA256_DIGEST_LENGTH + 1])
+{
+    for (uint i = 0; i < SHA256_DIGEST_LENGTH; i++)
+    {
+        sprintf(digestHexStringBuf + (i * 2), "%02x", hash[i]);
+    }
+    digestHexStringBuf[64] = '\0'; // set null terminator
+}
+
+/** SHA-256 digest file with path `path` into `digestHexStringBuf`.
+   See also: http://stackoverflow.com/questions/7853156/calculate-sha256-of-a-file-using-openssl-libcrypto-in-c
+   */
+int SHA256_Digest_File(const char* path,
+                       char digestHexStringBuf[2*SHA256_DIGEST_LENGTH + 1])
+{
+    FILE* file = fopen(path, "rb");
+    if (!file)
+    {
+        return -1;
+    }
+
+    SHA256_CTX sha256;
+    SHA256_Init(&sha256);
+
+    const int bufSize = 32768;
+    char* buffer = reinterpret_cast<char*>(malloc(bufSize));
+
+    if (!buffer)
+    {
+        fclose(file);
+        return -1;
+    }
+
+    int bytesRead = 0;
+    while((bytesRead = fread(buffer, 1, bufSize, file)))
+    {
+        SHA256_Update(&sha256, buffer, bytesRead);
+    }
+
+    unsigned char hash[SHA256_DIGEST_LENGTH];
+    SHA256_Final(hash, &sha256);
+
+    SHA256_hashString(hash, digestHexStringBuf);
+
+    fclose(file);
+    free(buffer);
+
+    return 0;
+}
+
+void compressToCache(const Traces& traces, const Path& sourcePath)
+{
+    FILE* source = fopen(sourcePath.c_str(), "w+");
+
+    // SHA-256
+    char digestHexStringBuf[2*SHA256_DIGEST_LENGTH + 1];
+    assert(SHA256_Digest_File(sourcePath.c_str(), digestHexStringBuf) >= 0);
+
+    const Path destPath = getArtifactPath(traces, digestHexStringBuf);
+
+    fprintf(stderr, "destPath:%s\n", destPath.c_str());
+    FILE* dest = fopen(destPath.c_str(), "w+");
+
+    z_compress(source, dest, Z_DEFAULT_COMPRESSION);
+    fclose(source);
+    fclose(dest);
+}
+
 int main(int argc, char* argv[], char* envp[])
 {
     int push = 1;
@@ -1115,6 +1191,7 @@ int main(int argc, char* argv[], char* envp[])
         {
             if (isHashableFilePath(path))
             {
+                compressToCache(traces, path);
                 if (first) { fprintf(fi, "absolute writes:\n"); first = false; }
                 fprintf(fi, "%s%s\n", indentation, path.c_str());
             }
@@ -1125,6 +1202,7 @@ int main(int argc, char* argv[], char* envp[])
         {
             if (isHashableFilePath(path))
             {
+                compressToCache(traces, path);
                 if (first) { fprintf(fi, "absolute reads:\n"); first = false; }
                 fprintf(fi, "%s%s\n", indentation, path.c_str());
             }

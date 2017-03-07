@@ -15,7 +15,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
-#include "zlib.h"
 
 #if defined(MSDOS) || defined(OS2) || defined(WIN32) || defined(__CYGWIN__)
 #  include <fcntl.h>
@@ -24,6 +23,8 @@
 #else
 #  define SET_BINARY_MODE(file)
 #endif
+
+#include "zpipe.h"
 
 /// Default chunk size.
 #define CHUNK (16384)

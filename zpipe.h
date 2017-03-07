@@ -1,5 +1,11 @@
 #include <stdio.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include <zlib.h>
+
 /* Compress from file `source` to file `dest` until `EOF` on `source`.
 
    Returns:
@@ -10,7 +16,7 @@
    linked do not match,
    - or `Z_ERRNO` if there is an error reading or writing the
    files. */
-int z_compress(FILE* source, FILE* dest, int level);
+extern int z_compress(FILE* source, FILE* dest, int level);
 
 /** Decompress from file `source` to file `dest` until stream ends or `EOF`.
 
@@ -22,4 +28,8 @@ int z_compress(FILE* source, FILE* dest, int level);
    linked do not match, or
    - `Z_ERRNO` if there is an error reading or writing the
    files. */
-int z_decompress(FILE* source, FILE* dest);
+extern int z_decompress(FILE* source, FILE* dest);
+
+#ifdef __cplusplus
+}
+#endif
