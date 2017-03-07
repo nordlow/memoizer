@@ -1,7 +1,7 @@
 // TODO add check for non-existing PROGRAM in call: ./memoized PROGRAM, for
 // instance when `foo` is given when `./foo` should be given
 
-// TODO add flag --no-env to skip environemnt
+// TODO add flag --no-env= to skip environemnt
 // TODO add flag --set-env= to set environment
 
 #include <sys/ptrace.h>
