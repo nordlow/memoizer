@@ -28,12 +28,13 @@
 #define CHUNK 16384
 
 /* Compress from file source to file dest until EOF on source.
-   def() returns Z_OK on success, Z_MEM_ERROR if memory could not be
-   allocated for processing, Z_STREAM_ERROR if an invalid compression
-   level is supplied, Z_VERSION_ERROR if the version of zlib.h and the
-   version of the library linked do not match, or Z_ERRNO if there is
-   an error reading or writing the files. */
-int z_decompress(FILE *source, FILE *dest, int level)
+
+   Returns: Z_OK on success, Z_MEM_ERROR if memory could not be allocated for
+   processing, Z_STREAM_ERROR if an invalid compression level is supplied,
+   Z_VERSION_ERROR if the version of zlib.h and the version of the library
+   linked do not match, or Z_ERRNO if there is an error reading or writing the
+   files. */
+int z_compress(FILE *source, FILE *dest, int level)
 {
     int ret, flush;
     unsigned have;
@@ -83,13 +84,14 @@ int z_decompress(FILE *source, FILE *dest, int level)
     return Z_OK;
 }
 
-/* Decompress from file source to file dest until stream ends or EOF.
-   z_compress() returns Z_OK on success, Z_MEM_ERROR if memory could not be
-   allocated for processing, Z_DATA_ERROR if the deflate data is
-   invalid or incomplete, Z_VERSION_ERROR if the version of zlib.h and
-   the version of the library linked do not match, or Z_ERRNO if there
-   is an error reading or writing the files. */
-int z_compress(FILE *source, FILE *dest)
+/** Decompress from file source to file dest until stream ends or EOF.
+
+   Returns: Z_OK on success, Z_MEM_ERROR if memory could not be allocated for
+   processing, Z_DATA_ERROR if the deflate data is invalid or incomplete,
+   Z_VERSION_ERROR if the version of zlib.h and the version of the library
+   linked do not match, or Z_ERRNO if there is an error reading or writing the
+   files. */
+int z_decompress(FILE *source, FILE *dest)
 {
     int ret;
     unsigned have;
@@ -183,7 +185,7 @@ int some_main(int argc, char **argv)
 
     /* do compression if no arguments */
     if (argc == 1) {
-        ret = z_decompress(stdin, stdout, Z_DEFAULT_COMPRESSION);
+        ret = z_compress(stdin, stdout, Z_DEFAULT_COMPRESSION);
         if (ret != Z_OK)
             zerr(ret);
         return ret;
@@ -191,7 +193,7 @@ int some_main(int argc, char **argv)
 
     /* do decompression if -d specified */
     else if (argc == 2 && strcmp(argv[1], "-d") == 0) {
-        ret = z_compress(stdin, stdout);
+        ret = z_decompress(stdin, stdout);
         if (ret != Z_OK)
             zerr(ret);
         return ret;
