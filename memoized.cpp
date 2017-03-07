@@ -1005,7 +1005,7 @@ void compressToCache(const Traces& traces, const Path& sourcePath)
     assert(dest);
 
     fprintf(stderr,
-            "memoized: Compressing artifact %s to %s ... ",
+            "memoized: compressing artifact %s to %s ... ",
             sourcePath.c_str(),
             destPath.c_str());
     fflush(stderr);
