@@ -992,16 +992,18 @@ int SHA256_Digest_File(const char* path,
 
 void compressToCache(const Traces& traces, const Path& sourcePath)
 {
-    FILE* source = fopen(sourcePath.c_str(), "w+");
+    FILE* source = fopen(sourcePath.c_str(), "r");
+    assert(source);
 
     // SHA-256
     char digestHexStringBuf[2*SHA256_DIGEST_LENGTH + 1];
     assert(SHA256_Digest_File(sourcePath.c_str(), digestHexStringBuf) >= 0);
 
-    const Path destPath = getArtifactPath(traces, digestHexStringBuf, "gz");
+    const Path destPath = getArtifactPath(traces, digestHexStringBuf, "z");
 
-    fprintf(stderr, "destPath:%s\n", destPath.c_str());
+    fprintf(stderr, "Writing compressed artifact %s\n", destPath.c_str());
     FILE* dest = fopen(destPath.c_str(), "w+");
+    assert(dest);
 
     z_compress(source, dest, Z_DEFAULT_COMPRESSION);
     fclose(source);
@@ -1148,6 +1150,7 @@ int main(int argc, char* argv[], char* envp[])
         {
             if (isHashableFilePath(path))
             {
+                compressToCache(traces, path);
                 if (first) { fprintf(fi, "relative writes:\n"); first = false; }
                 fprintf(fi, "%s%s\n", indentation, path.c_str());
             }
@@ -1203,7 +1206,6 @@ int main(int argc, char* argv[], char* envp[])
         {
             if (isHashableFilePath(path))
             {
-                compressToCache(traces, path);
                 if (first) { fprintf(fi, "absolute reads:\n"); first = false; }
                 fprintf(fi, "%s%s\n", indentation, path.c_str());
             }
