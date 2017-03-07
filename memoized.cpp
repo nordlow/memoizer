@@ -52,6 +52,8 @@
 #include <iostream>
 #include <stdexcept>
 
+#include "zpipe.h"
+
 /// Run command `cmd`.
 std::string exec(const char* cmd)
 {
