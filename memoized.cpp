@@ -1022,6 +1022,16 @@ void compressToCache(const Traces& traces, const Path& sourcePath)
             fprintf(stderr, "done\n");
         }
     }
+    else
+    {
+        if (true)
+        {
+            fprintf(stderr,
+                    "memoized: artifact `%s` already compressed to `%s`\n",
+                    sourcePath.c_str(),
+                    destPath.c_str());
+        }
+    }
 }
 
 int main(int argc, char* argv[], char* envp[])
