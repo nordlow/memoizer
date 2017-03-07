@@ -15,7 +15,7 @@ using std::dec;
 
 int main(int argc, const char * argv[], const char * envp[])
 {
-    const int new_fd = open("output", O_WRONLY | O_CREAT | O_TRUNC, 0777);
+    const int new_fd = open("test_output", O_WRONLY | O_CREAT | O_TRUNC, 0777);
     assert(new_fd);
     assert(close(new_fd) >= 0);
 
