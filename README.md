@@ -25,6 +25,10 @@ Enables
 Planned Features
 ================
 
+Assert read from persistent inputs:
+
+- `--assert-only-persistent-reads`
+
 Assert read and writes from specific set of directories:
 
 - `--only-reads-from=DIRS`
