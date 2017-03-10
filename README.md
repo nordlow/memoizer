@@ -28,7 +28,7 @@ Planned Features
 Assert project-relative reads from only persistent inputs, that is non-modified
 files with Git status up-to-date:
 
-- `--assert-only-persistent-reads`
+- `--assert-persistent-relative-reads`
 
 Assert read and writes from specific set of directories:
 
