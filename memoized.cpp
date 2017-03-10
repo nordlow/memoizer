@@ -1,7 +1,8 @@
 // TODO add check for non-existing PROGRAM in call: ./memoized PROGRAM, for
 // instance when `foo` is given when `./foo` should be given
 
-// TODO write to cache with z_compress()
+// TODO atomic_z_compress with mktemp and rename
+
 // TODO read from cache with z_decompress()
 
 // TODO Alternatively use http://stackoverflow.com/questions/5649030/how-can-i-easily-compress-and-decompress-files-using-zlib
