@@ -38,5 +38,5 @@ Assert read and writes from specific set of directories:
 Environment control:
 
 - `--empty-default-env`, `--no-default-env`
-- `--set-env=...`
+- `--set-env='PATH=PATH_VALUE'`
 - `--use-existing-env-vars=PATH,..`
