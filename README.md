@@ -25,7 +25,7 @@ Enables
 Planned Features
 ================
 
-Assert read from persistent inputs:
+Assert read from persistent inputs, that is non-modified files with Git status up-to-date:
 
 - `--assert-only-persistent-reads`
 
