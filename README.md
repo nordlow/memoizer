@@ -39,4 +39,4 @@ Environment control:
 
 - `--empty-default-env`, `--no-default-env`
 - `--set-env=...`
-- `--use-env-vars=PATH,..`
+- `--use-existing-env-vars=PATH,..`
