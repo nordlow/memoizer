@@ -98,7 +98,7 @@ std::string exec(const char* cmd)
 
 #define getReg(child, name) __get_reg(child, offsetof(struct user, regs.name))
 
-const bool show = false;
+const bool show = true;
 
 long __get_reg(pid_t child, int off)
 {
@@ -994,6 +994,9 @@ int SHA256_Digest_File(const char* path,
 // TODO handle abrupt termination by first writing to temporary and then moving it cache atomically
 void compressToCache(const Traces& traces, const Path& sourcePath)
 {
+    printf("Compressing %s\n", sourcePath.c_str());
+    fflush(stdout);
+
     char digestHexStringBuf[2*SHA256_DIGEST_LENGTH + 1];
     assert(SHA256_Digest_File(sourcePath.c_str(), digestHexStringBuf) >= 0);
 
@@ -1012,9 +1015,9 @@ void compressToCache(const Traces& traces, const Path& sourcePath)
 
         // atomically compress from sourcePath to destPath
         char tempName[PATH_MAX];
-        sprintf(tempName, "memoizedXXXXXX");
+        sprintf(tempName, "/tmp/artifact_XXXXXX");
         const int tempFd = mkstemp(tempName);
-        printf("tempName:%s\n", tempName);
+        fprintf(stderr, "tempName:%s\n", tempName);
         assert(tempFd != -1);
         FILE* tempFile = fdopen(tempFd, "w");
         FILE* source = fopen(sourcePath.c_str(), "r");
@@ -1022,8 +1025,8 @@ void compressToCache(const Traces& traces, const Path& sourcePath)
         z_compress(source, tempFile, Z_DEFAULT_COMPRESSION); // compress to temporary
 
         // close temporary before moving it
-        assert(fclose(tempFile) == 0);
-        assert(close(tempFd) != -1);
+        assert(fclose(tempFile) == 0); // also closes tempFd
+        // assert(close(tempFd) != -1);
 
         rename(tempName, destPath.c_str()); // atomic
         assert(fclose(source) == 0);
