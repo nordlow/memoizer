@@ -98,7 +98,7 @@ std::string exec(const char* cmd)
 
 #define getReg(child, name) __get_reg(child, offsetof(struct user, regs.name))
 
-const bool show = true;
+const bool show = false;
 
 long __get_reg(pid_t child, int off)
 {
@@ -994,9 +994,6 @@ int SHA256_Digest_File(const char* path,
 // TODO handle abrupt termination by first writing to temporary and then moving it cache atomically
 void compressToCache(const Traces& traces, const Path& sourcePath)
 {
-    printf("Compressing %s\n", sourcePath.c_str());
-    fflush(stdout);
-
     char digestHexStringBuf[2*SHA256_DIGEST_LENGTH + 1];
     assert(SHA256_Digest_File(sourcePath.c_str(), digestHexStringBuf) >= 0);
 
