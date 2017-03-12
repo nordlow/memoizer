@@ -1014,15 +1014,19 @@ void compressToCache(const Traces& traces, const Path& sourcePath)
         char tempName[PATH_MAX];
         sprintf(tempName, "memoizedXXXXXX");
         const int tempFd = mkstemp(tempName);
+        printf("tempName:%s\n", tempName);
         assert(tempFd != -1);
         FILE* tempFile = fdopen(tempFd, "w");
         FILE* source = fopen(sourcePath.c_str(), "r");
         assert(source);
         z_compress(source, tempFile, Z_DEFAULT_COMPRESSION); // compress to temporary
-        rename(tempName, destPath.c_str()); // atomic
-        assert(fclose(source) == 0);
+
+        // close temporary before moving it
         assert(fclose(tempFile) == 0);
         assert(close(tempFd) != -1);
+
+        rename(tempName, destPath.c_str()); // atomic
+        assert(fclose(source) == 0);
 
         if (true)
         {
