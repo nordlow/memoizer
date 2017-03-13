@@ -997,7 +997,7 @@ void compressToCache(const Traces& traces, const Path& sourcePath)
     char digestHexStringBuf[2*SHA256_DIGEST_LENGTH + 1];
     assert(SHA256_Digest_File(sourcePath.c_str(), digestHexStringBuf) >= 0);
 
-    const Path destPath = getArtifactPath(traces, digestHexStringBuf, "z");
+    const Path destPath = getArtifactPath(traces, digestHexStringBuf, "zlib_compressed_data");
 
     if (access(destPath.c_str(), F_OK) == -1) // if fname doesn't exit
     {
