@@ -1070,12 +1070,10 @@ int main(int argc, char* argv[], char* envp[])
     if (strcmp(argv[1], "-n") == 0)
     {
         char *syscallname = argv[2];
-        struct syscall_entry *ent;
-        uint i;
 
-        for (i = 0; i < sizeof(syscalls)/sizeof(*syscalls); i++)
+        for (uint i = 0; i < sizeof(syscalls)/sizeof(*syscalls); i++)
         {
-            ent = &syscalls[i];
+            struct syscall_entry *ent = &syscalls[i];
             if (strcmp(syscallname, ent->name) == 0)
             {
                 syscall = i;
