@@ -19,6 +19,30 @@ int main(int argc, const char * argv[], const char * envp[])
     }
 
     {
+        const int new_fd = open("test_output_copy", O_WRONLY | O_CREAT | O_TRUNC, 0777);
+        const char* text = "Some output\n";
+        write(new_fd, text, strlen(text));
+        assert(new_fd);
+        assert(close(new_fd) >= 0);
+    }
+
+    {
+        const int new_fd = open("test_output1", O_WRONLY | O_CREAT | O_TRUNC, 0777);
+        const char* text = "Some other output\n";
+        write(new_fd, text, strlen(text));
+        assert(new_fd);
+        assert(close(new_fd) >= 0);
+    }
+
+    {
+        const int new_fd = open("test_output1_copy", O_WRONLY | O_CREAT | O_TRUNC, 0777);
+        const char* text = "Some other output\n";
+        write(new_fd, text, strlen(text));
+        assert(new_fd);
+        assert(close(new_fd) >= 0);
+    }
+
+    {
         const int main_fd = open("main.cpp", O_RDONLY);
         assert(main_fd);
         assert(close(main_fd) >= 0);
