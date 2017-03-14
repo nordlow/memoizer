@@ -1,7 +1,7 @@
+// TODO search for: memoize this call
+
 // TODO add check for non-existing PROGRAM in call: ./memoized PROGRAM, for
 // instance when `foo` is given when `./foo` should be given
-
-// TODO atomic_z_compress with mktemp and rename
 
 // TODO read from cache with z_decompress()
 
@@ -1083,12 +1083,17 @@ bool assertCompressedToCache(const Traces& traces, const Path& sourcePath)
     return needsWrite;
 }
 
-int fprintFilePathState(FILE* fi, const Path& path)
+int fprintFilePathState(FILE* fi,
+                        const char* indentation,
+                        const Path& path)
 {
-    struct timespec progModTime = statModTimespec(path);
+    struct timespec progModTime = statModTimespec(path); // TODO memoize this call
+
     SHA256HexCString progHexCharBuf;
-    assert(SHA256_Digest_File(path, progHexCharBuf) >= 0);
-    return fprintf(fi, "    %s %ld.%09ld %s\n",
+    assert(SHA256_Digest_File(path, progHexCharBuf) >= 0); // TODO memoize this call
+
+    return fprintf(fi, "%s%s %ld.%09ld %s\n",
+                   indentation,
                    path.c_str(),
                    progModTime.tv_sec,
                    progModTime.tv_nsec,
@@ -1179,7 +1184,7 @@ int main(int argc, char* argv[], char* envp[])
         const char* indentation = "    ";
 
         fprintf(fi, "program:\n");
-        fprintFilePathState(fi, progRealPath);
+        fprintFilePathState(fi, indentation, progRealPath);
 
         fprintf(fi, "call:\n");
         for (int i = 1; i != argc; ++i) // all but first argument
@@ -1234,7 +1239,7 @@ int main(int argc, char* argv[], char* envp[])
             {
                 assertCompressedToCache(traces, path);
                 if (first) { fprintf(fi, "relative writes:\n"); first = false; }
-                fprintf(fi, "%s%s\n", indentation, path.c_str());
+                fprintFilePathState(fi, indentation, path);
             }
         }
 
@@ -1244,7 +1249,7 @@ int main(int argc, char* argv[], char* envp[])
             if (isHashableFilePath(path))
             {
                 if (first) { fprintf(fi, "relative reads:\n"); first = false; }
-                fprintf(fi, "%s%s\n", indentation, path.c_str());
+                fprintFilePathState(fi, indentation, path);
             }
         }
 
@@ -1279,7 +1284,7 @@ int main(int argc, char* argv[], char* envp[])
             {
                 assertCompressedToCache(traces, path);
                 if (first) { fprintf(fi, "absolute writes:\n"); first = false; }
-                fprintf(fi, "%s%s\n", indentation, path.c_str());
+                fprintFilePathState(fi, indentation, path);
             }
         }
 
@@ -1289,7 +1294,7 @@ int main(int argc, char* argv[], char* envp[])
             if (isHashableFilePath(path))
             {
                 if (first) { fprintf(fi, "absolute reads:\n"); first = false; }
-                fprintf(fi, "%s%s\n", indentation, path.c_str());
+                fprintFilePathState(fi, indentation, path);
             }
         }
 
