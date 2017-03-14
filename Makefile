@@ -4,7 +4,7 @@ LINUX_SRC=/usr/include/asm
 CXX=g++
 CC=gcc
 
-CFLAGS=-Wall -Wextra -O2 -g
+CFLAGS=-Wall -Wextra -Og -g
 CXXFLAGS=$(CFLAGS) -std=c++17
 
 LDFLAGS=-lssl -lcrypto -lz		# -s	# SHA hashing support
