@@ -1,3 +1,4 @@
+// TODO search for: lookup absolute path for this
 // TODO search for: memoize this call
 
 // TODO add check for non-existing PROGRAM in call: ./memoized PROGRAM, for
@@ -1175,9 +1176,7 @@ int main(int argc, char* argv[], char* envp[])
 
         assert(argc >= 2);
         traces.topChildExecPath = argv[1]; // TODO lookup absolute path for this
-
         traces.homePath = getenv("HOME");
-
         traces.topCwdPath = getCwdPath();
 
         const int attachRetVal = attachAndPtraceTopChild(traces, topChild);
