@@ -961,8 +961,6 @@ std::string execPathOfPid(pid_t pid)
 
 int attachAndPtraceTopChild(Traces& traces, pid_t topChild)
 {
-    printf("traces.topChildExecPath:%s\n", traces.topChildExecPath.c_str());
-
     const int retVal = tryAttachToPid(topChild);
     if (retVal < 0) { return retVal; }
 
