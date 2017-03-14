@@ -1,4 +1,4 @@
 #!/bin/bash
 
 make -C ../.. memoized &&
-../../memoized ls
+../../memoized /bin/ls
