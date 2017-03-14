@@ -1204,7 +1204,7 @@ int main(int argc, char* argv[], char* envp[])
 
         const char* indentation = "    ";
 
-        fprintf(tempStateFile, "program:\n");
+        fprintf(tempStateFile, "executable:\n");
         fprintFilePathState(tempStateFile, indentation, traces.topChildExecPath);
 
         fprintf(tempStateFile, "call:\n");
@@ -1373,7 +1373,7 @@ int main(int argc, char* argv[], char* envp[])
         // atomically move it
         SHA256HexCString progHexCharBuf;
         assert(SHA256_Digest_File(traces.topChildExecPath, progHexCharBuf) >= 0); // TODO memoize this call
-        const Path tempStateFilePath = (traces.homePath + "/.cache/memoized/calls/exec:" + progHexCharBuf + "-state_fingerprint.txt");
+        const Path tempStateFilePath = (traces.homePath + "/.cache/memoized/calls/executable_content=SHA256-" + progHexCharBuf);
         rename(tempStateName, tempStateFilePath.c_str());
     }
 }
