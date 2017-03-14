@@ -1027,7 +1027,7 @@ bool assertCompressedToCache(const Traces& traces, const Path& sourcePath)
             fflush(stderr);
         }
 
-        // atomically compress from sourcePath to destPath
+        // atomically compress from `sourcePath` to `destPath`
         char tempName[PATH_MAX];
         sprintf(tempName, "/tmp/artifact_XXXXXX");
         const int tempFd = mkstemp(tempName);
