@@ -442,10 +442,23 @@ void printSyscall(pid_t child, long syscall_num, long retval)
     fprintf(stderr, "%ld;", retval);
 }
 
+Path realPath(const char* path)
+{
+    char pathBuf[PATH_MAX];
+    return Path(realpath(path, pathBuf));
+}
+
+Path getCwdPath()
+{
+    char pathBuf[PATH_MAX];
+    return Path(getcwd(pathBuf, PATH_MAX));
+}
+
 bool isAbsolutePath(const Path& path)
 {
     return !path.empty() && path[0] == '/';
 }
+
 
 /// Create tree cache directories if it doesn't exist.
 void assertCacheDirTree(Traces& traces)
@@ -1111,12 +1124,11 @@ int main(int argc, char* argv[], char* envp[])
         Traces traces;
         traces.homePath = getenv("HOME");
 
-        char cwdBuf[PATH_MAX];
-        const char* cwd = getcwd(cwdBuf, PATH_MAX);
-        traces.topCwdPath = cwd;
+        traces.topCwdPath = getCwdPath();
 
-        std::string progPath = argv[0];
-        std::string progAbsPath = cwd + ("/" + progPath);
+        assert(argc >= 2);
+        std::string progPath = argv[1];
+        std::string progRealPath = realPath(progPath.c_str());
 
         const int attachRetVal = attachAndPtraceTopChild(traces, topChild);
         if (attachRetVal < 0)
@@ -1135,7 +1147,7 @@ int main(int argc, char* argv[], char* envp[])
         const char* indentation = "    ";
 
         fprintf(fi, "program:\n");
-        fprintf(fi, "    %s TODO st_mtime and sha256:\n", progAbsPath.c_str());
+        fprintf(fi, "    %s TODO st_mtime and sha256:\n", progRealPath.c_str());
 
         fprintf(fi, "call:\n");
         for (int i = 1; i != argc; ++i) // all but first argument
@@ -1143,7 +1155,7 @@ int main(int argc, char* argv[], char* envp[])
             fprintf(fi, "%s%s\n", indentation, argv[i]);
         }
 
-        fprintf(fi, "cwd: %s\n", cwd);
+        fprintf(fi, "cwd: %s\n", traces.topCwdPath.c_str());
 
         bool first = false;
 
