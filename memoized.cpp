@@ -969,7 +969,7 @@ void SHA256_hashString(const unsigned char hash[SHA256_DIGEST_LENGTH],
    See also: http://stackoverflow.com/questions/7853156/calculate-sha256-of-a-file-using-openssl-libcrypto-in-c
    */
 int SHA256_Digest_File(const char* path,
-                       char digestHexStringBuf[2*SHA256_DIGEST_LENGTH + 1])
+                       SHA256HexString digestHexStringBuf)
 {
     FILE* file = fopen(path, "rb");
     if (!file)
