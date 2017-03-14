@@ -1059,21 +1059,28 @@ bool assertCompressedToCache(const Traces& traces, const Path& sourcePath)
         }
 
         // atomically compress from `sourcePath` to `destPath`
+
+        // create temporary file for output writing
         char tempName[PATH_MAX];
         sprintf(tempName, "/tmp/artifact_XXXXXX");
         const int tempFd = mkstemp(tempName);
-        fprintf(stderr, "tempName:%s\n", tempName);
         assert(tempFd != -1);
         FILE* tempFile = fdopen(tempFd, "w");
+
+        // open source
         FILE* source = fopen(sourcePath.c_str(), "r");
         assert(source);
+
+        // compress source to tempfile
         z_compress(source, tempFile, Z_DEFAULT_COMPRESSION); // compress to temporary
 
         // close temporary before moving it
         assert(fclose(tempFile) == 0); // also closes tempFd
-        // assert(close(tempFd) != -1);
 
-        rename(tempName, destPath.c_str()); // atomic
+        // atomically move it to artifact cache
+        rename(tempName, destPath.c_str());
+
+        // close source
         assert(fclose(source) == 0);
 
         if (true)
@@ -1186,11 +1193,13 @@ int main(int argc, char* argv[], char* envp[])
 
         // TODO calculate chash from `pwd` `argv` and 'env' used in child
 
+        // post process
+
         SHA256HexCString progHexCharBuf;
         assert(SHA256_Digest_File(traces.topChildExecPath, progHexCharBuf) >= 0); // TODO memoize this call
-
-        // post process
         const Path statFilePath = (traces.homePath + "/.cache/memoized/calls/exec:" + progHexCharBuf + "-state_fingerprint.txt");
+
+        mktem
         FILE* fi = fopen(statFilePath.c_str(), "wb");
 
         const char* indentation = "    ";
