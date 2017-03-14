@@ -991,7 +991,7 @@ int SHA256_Digest_File(const char* path,
     return 0;
 }
 
-/** Compressed `sourcePath` to artifact cache if it isn't already that.
+/** Compress `sourcePath` to artifact cache if it isn't already that.
 
     TODO handle abrupt termination by first writing to temporary and then moving it cache atomically
  */
