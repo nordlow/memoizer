@@ -956,20 +956,20 @@ int attachAndPtraceTopChild(Traces& traces, pid_t topChild)
 typedef char SHA256HexString[2*SHA256_DIGEST_LENGTH + 1];
 
 void SHA256_hashString(const unsigned char hash[SHA256_DIGEST_LENGTH],
-                       SHA256HexString digestHexStringBuf)
+                       SHA256HexString hexCharBuf)
 {
     for (uint i = 0; i < SHA256_DIGEST_LENGTH; i++)
     {
-        sprintf(digestHexStringBuf + (i * 2), "%02x", hash[i]);
+        sprintf(hexCharBuf + (i * 2), "%02x", hash[i]);
     }
-    digestHexStringBuf[64] = '\0'; // set null terminator
+    hexCharBuf[64] = '\0'; // set null terminator
 }
 
-/** SHA-256 digest file with path `path` into `digestHexStringBuf`.
+/** SHA-256 digest file with path `path` into `hexCharBuf`.
    See also: http://stackoverflow.com/questions/7853156/calculate-sha256-of-a-file-using-openssl-libcrypto-in-c
    */
 int SHA256_Digest_File(const char* path,
-                       SHA256HexString digestHexStringBuf)
+                       SHA256HexString hexCharBuf)
 {
     FILE* file = fopen(path, "rb");
     if (!file)
@@ -998,7 +998,7 @@ int SHA256_Digest_File(const char* path,
     unsigned char hash[SHA256_DIGEST_LENGTH];
     SHA256_Final(hash, &sha256);
 
-    SHA256_hashString(hash, digestHexStringBuf);
+    SHA256_hashString(hash, hexCharBuf);
 
     fclose(file);
     free(buffer);
@@ -1012,10 +1012,10 @@ int SHA256_Digest_File(const char* path,
  */
 bool assertCompressedToCache(const Traces& traces, const Path& sourcePath)
 {
-    SHA256HexString digestHexStringBuf;
-    assert(SHA256_Digest_File(sourcePath.c_str(), digestHexStringBuf) >= 0);
+    SHA256HexString hexCharBuf;
+    assert(SHA256_Digest_File(sourcePath.c_str(), hexCharBuf) >= 0);
 
-    const Path destPath = getArtifactPath(traces, digestHexStringBuf, "zlib_compressed_data");
+    const Path destPath = getArtifactPath(traces, hexCharBuf, "zlib_compressed_data");
 
     const bool needsWrite = access(destPath.c_str(), F_OK) == -1;
     if (needsWrite)
