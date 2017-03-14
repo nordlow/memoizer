@@ -1094,10 +1094,10 @@ int fprintFilePathState(FILE* fi,
 
     return fprintf(fi, "%s%s %ld.%09ld %s\n",
                    indentation,
-                   path.c_str(),
+                   progHexCharBuf,
                    progModTime.tv_sec,
                    progModTime.tv_nsec,
-                   progHexCharBuf);
+                   path.c_str());
 }
 
 int main(int argc, char* argv[], char* envp[])
