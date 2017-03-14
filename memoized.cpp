@@ -296,11 +296,16 @@ std::string readCxxString(pid_t child, unsigned long addr)
     return path;
 }
 
-struct timespec statModTimespec(const char* path)
+struct timespec statModTimespec_C(const char* path)
 {
     struct stat st;
     assert(stat(path, &st) == 0);
     return st.st_mtim; // modification time
+}
+
+struct timespec statModTimespec(const Path& path)
+{
+    return statModTimespec_C(path.c_str());
 }
 
 /** Allocate and return a copy of a null-terminated C string at `addr`.
@@ -1078,6 +1083,18 @@ bool assertCompressedToCache(const Traces& traces, const Path& sourcePath)
     return needsWrite;
 }
 
+int fprintFilePathState(FILE* fi, const Path& path)
+{
+    struct timespec progModTime = statModTimespec(path);
+    SHA256HexCString progHexCharBuf;
+    assert(SHA256_Digest_File(path, progHexCharBuf) >= 0);
+    return fprintf(fi, "    %s %ld.%09ld %s\n",
+                   path.c_str(),
+                   progModTime.tv_sec,
+                   progModTime.tv_nsec,
+                   progHexCharBuf);
+}
+
 int main(int argc, char* argv[], char* envp[])
 {
     int push = 1;
@@ -1162,13 +1179,7 @@ int main(int argc, char* argv[], char* envp[])
         const char* indentation = "    ";
 
         fprintf(fi, "program:\n");
-
-        SHA256HexCString progHexCharBuf;
-        assert(SHA256_Digest_File(progRealPath, progHexCharBuf) >= 0);
-
-        fprintf(fi, "    %s TODO st_mtime %s\n",
-                progRealPath.c_str(),
-                progHexCharBuf);
+        fprintFilePathState(fi, progRealPath);
 
         fprintf(fi, "call:\n");
         for (int i = 1; i != argc; ++i) // all but first argument
