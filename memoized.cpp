@@ -992,7 +992,7 @@ int SHA256_Digest_File(const char* path,
 }
 
 // TODO handle abrupt termination by first writing to temporary and then moving it cache atomically
-bool compressToCache(const Traces& traces, const Path& sourcePath)
+bool assertCompressedToCache(const Traces& traces, const Path& sourcePath)
 {
     char digestHexStringBuf[2*SHA256_DIGEST_LENGTH + 1];
     assert(SHA256_Digest_File(sourcePath.c_str(), digestHexStringBuf) >= 0);
@@ -1185,7 +1185,7 @@ int main(int argc, char* argv[], char* envp[])
         {
             if (isHashableFilePath(path))
             {
-                compressToCache(traces, path);
+                assertCompressedToCache(traces, path);
                 if (first) { fprintf(fi, "relative writes:\n"); first = false; }
                 fprintf(fi, "%s%s\n", indentation, path.c_str());
             }
@@ -1230,7 +1230,7 @@ int main(int argc, char* argv[], char* envp[])
         {
             if (isHashableFilePath(path))
             {
-                compressToCache(traces, path);
+                assertCompressedToCache(traces, path);
                 if (first) { fprintf(fi, "absolute writes:\n"); first = false; }
                 fprintf(fi, "%s%s\n", indentation, path.c_str());
             }
