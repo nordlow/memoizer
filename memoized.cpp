@@ -1370,7 +1370,7 @@ int main(int argc, char* argv[], char* envp[])
 
         fclose(tempStateFile);
 
-        // atomically move temporary state file to cache path
+        // atomically move temporary state file to call state path
         SHA256HexCString progHexCharBuf;
         assert(SHA256_Digest_File(traces.topChildExecPath, progHexCharBuf) >= 0); // TODO memoize this call
         const Path tempStateFilePath = (traces.homePath +
