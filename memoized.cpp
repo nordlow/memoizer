@@ -473,10 +473,10 @@ void assertCacheDirTree(Traces& traces)
 
 /// Create tree cache directories if it doesn't exist.
 Path getArtifactPath(const Traces& traces,
-                     const char* filePath,
+                     const char* fileName,
                      const char* fileExtension)
 {
-    return traces.homePath + "/.cache/memoized/artifacts" + "/" + filePath + "." + fileExtension;
+    return traces.homePath + "/.cache/memoized/artifacts" + "/" + fileName + "." + fileExtension;
 }
 
 /** Lookup path of file descriptor `fd` of process with pid `pid` and put into
