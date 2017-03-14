@@ -1198,22 +1198,22 @@ int main(int argc, char* argv[], char* envp[])
         // create temporary fingerprint file
         char tempStateName[PATH_MAX];
         sprintf(tempStateName, "/tmp/memoized_state_fingerprint_XXXXXX");
-        const int stateFd = mkstemp(tempStateName);
-        assert(stateFd != -1);
-        FILE* stateFile = fdopen(stateFd, "w");
+        const int tempStateFd = mkstemp(tempStateName);
+        assert(tempStateFd != -1);
+        FILE* tempStateFile = fdopen(tempStateFd, "w");
 
         const char* indentation = "    ";
 
-        fprintf(stateFile, "program:\n");
-        fprintFilePathState(stateFile, indentation, traces.topChildExecPath);
+        fprintf(tempStateFile, "program:\n");
+        fprintFilePathState(tempStateFile, indentation, traces.topChildExecPath);
 
-        fprintf(stateFile, "call:\n");
+        fprintf(tempStateFile, "call:\n");
         for (int i = 1; i != argc; ++i) // all but first argument
         {
-            fprintf(stateFile, "%s%s\n", indentation, argv[i]);
+            fprintf(tempStateFile, "%s%s\n", indentation, argv[i]);
         }
 
-        fprintf(stateFile, "cwd: %s\n", traces.topCwdPath.c_str());
+        fprintf(tempStateFile, "cwd: %s\n", traces.topCwdPath.c_str());
 
         bool first = false;
 
@@ -1259,8 +1259,8 @@ int main(int argc, char* argv[], char* envp[])
             if (isHashableFilePath(path))
             {
                 assertCompressedToCache(traces, path);
-                if (first) { fprintf(stateFile, "relative writes:\n"); first = false; }
-                fprintFilePathState(stateFile, indentation, path);
+                if (first) { fprintf(tempStateFile, "relative writes:\n"); first = false; }
+                fprintFilePathState(tempStateFile, indentation, path);
             }
         }
 
@@ -1269,8 +1269,8 @@ int main(int argc, char* argv[], char* envp[])
         {
             if (isHashableFilePath(path))
             {
-                if (first) { fprintf(stateFile, "relative reads:\n"); first = false; }
-                fprintFilePathState(stateFile, indentation, path);
+                if (first) { fprintf(tempStateFile, "relative reads:\n"); first = false; }
+                fprintFilePathState(tempStateFile, indentation, path);
             }
         }
 
@@ -1283,17 +1283,17 @@ int main(int argc, char* argv[], char* envp[])
             {
                 if (isHashableFilePath(path))
                 {
-                    if (first) { fprintf(stateFile, "relative stats:\n"); first = false; }
-                    fprintf(stateFile, "%s%s", indentation, path.c_str());
+                    if (first) { fprintf(tempStateFile, "relative stats:\n"); first = false; }
+                    fprintf(tempStateFile, "%s%s", indentation, path.c_str());
                     auto hit = trace1.maxTimespecByStatPath.find(Path(path));
                     if (hit != trace1.maxTimespecByStatPath.end()) // if hit
                     {
-                        fprintf(stateFile,
+                        fprintf(tempStateFile,
                                 " %ld.%09ld",
                                 hit->second.tv_sec,
                                 hit->second.tv_nsec);
                     }
-                    endl(stateFile);
+                    endl(tempStateFile);
                 }
             }
         }
@@ -1304,8 +1304,8 @@ int main(int argc, char* argv[], char* envp[])
             if (isHashableFilePath(path))
             {
                 assertCompressedToCache(traces, path);
-                if (first) { fprintf(stateFile, "absolute writes:\n"); first = false; }
-                fprintFilePathState(stateFile, indentation, path);
+                if (first) { fprintf(tempStateFile, "absolute writes:\n"); first = false; }
+                fprintFilePathState(tempStateFile, indentation, path);
             }
         }
 
@@ -1314,8 +1314,8 @@ int main(int argc, char* argv[], char* envp[])
         {
             if (isHashableFilePath(path))
             {
-                if (first) { fprintf(stateFile, "absolute reads:\n"); first = false; }
-                fprintFilePathState(stateFile, indentation, path);
+                if (first) { fprintf(tempStateFile, "absolute reads:\n"); first = false; }
+                fprintFilePathState(tempStateFile, indentation, path);
             }
         }
 
@@ -1328,24 +1328,24 @@ int main(int argc, char* argv[], char* envp[])
             {
                 if (isHashableFilePath(path))
                 {
-                    if (first) { fprintf(stateFile, "absolute stats:\n"); first = false; }
-                    fprintf(stateFile, "%s%s", indentation, path.c_str());
+                    if (first) { fprintf(tempStateFile, "absolute stats:\n"); first = false; }
+                    fprintf(tempStateFile, "%s%s", indentation, path.c_str());
                     auto hit = trace1.maxTimespecByStatPath.find(Path(path));
                     if (hit != trace1.maxTimespecByStatPath.end()) // if hit
                     {
-                        fprintf(stateFile,
+                        fprintf(tempStateFile,
                                 " %ld.%09ld",
                                 hit->second.tv_sec,
                                 hit->second.tv_nsec);
                     }
-                    endl(stateFile);
+                    endl(tempStateFile);
                 }
             }
         }
 
         const bool sortedEnv = true;
 
-        fprintf(stateFile, "environment:\n");
+        fprintf(tempStateFile, "environment:\n");
         if (sortedEnv)
         {
             std::vector<std::string> env;
@@ -1357,24 +1357,24 @@ int main(int argc, char* argv[], char* envp[])
 
             for (int i = 0; envp[i]; ++i)
             {
-                fprintf(stateFile, "%s%s\n", indentation, env[i].c_str());
+                fprintf(tempStateFile, "%s%s\n", indentation, env[i].c_str());
             }
         }
         else
         {
             for (int i = 0; envp[i]; ++i)
             {
-                fprintf(stateFile, "%s%s\n", indentation, envp[i]);
+                fprintf(tempStateFile, "%s%s\n", indentation, envp[i]);
             }
         }
 
-        fclose(stateFile);
+        fclose(tempStateFile);
 
         // atomically move it
         SHA256HexCString progHexCharBuf;
         assert(SHA256_Digest_File(traces.topChildExecPath, progHexCharBuf) >= 0); // TODO memoize this call
-        const Path stateFilePath = (traces.homePath + "/.cache/memoized/calls/exec:" + progHexCharBuf + "-state_fingerprint.txt");
-        rename(tempStateName, stateFilePath.c_str());
+        const Path tempStateFilePath = (traces.homePath + "/.cache/memoized/calls/exec:" + progHexCharBuf + "-state_fingerprint.txt");
+        rename(tempStateName, tempStateFilePath.c_str());
     }
 }
 
