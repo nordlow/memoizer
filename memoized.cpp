@@ -189,6 +189,9 @@ struct Traces
     Path homePath;
     Path topCwdPath;            // cwd path of top child
 
+    /// Full path of top child executable.
+    Path topChildExecPath;
+
     /// Traces by process `pid_t`.
     std::unordered_map<pid_t, Trace1> trace1ByPid;
 };
@@ -839,9 +842,8 @@ void handleSyscall(pid_t child, Traces& traces)
 
 int doChild(int argc, char **argv)
 {
-    char *args [argc+1];
-    int i;
-    for (i = 0; i < argc; i++)
+    char* args[argc+1];
+    for (int i = 0; i < argc; i++)
     {
         args[i] = argv[i];
     }
@@ -947,8 +949,19 @@ ok:
     return 0;
 }
 
+std::string execPathOfPid(pid_t pid)
+{
+    char pathBuf[PATH_MAX];
+    char procPathBuf[PATH_MAX];
+    snprintf(procPathBuf, sizeof(procPathBuf), "/proc/%d/exe", pid);
+    ssize_t count = readlink(procPathBuf, pathBuf, PATH_MAX);
+    return std::string(pathBuf, (count > 0) ? count : 0);
+}
+
 int attachAndPtraceTopChild(Traces& traces, pid_t topChild)
 {
+    printf("traces.topChildExecPath:%s\n", traces.topChildExecPath.c_str());
+
     const int retVal = tryAttachToPid(topChild);
     if (retVal < 0) { return retVal; }
 
@@ -1159,13 +1172,13 @@ int main(int argc, char* argv[], char* envp[])
     else                        /* in the parent */
     {
         Traces traces;
+
+        assert(argc >= 2);
+        traces.topChildExecPath = argv[1]; // TODO lookup absolute path for this
+
         traces.homePath = getenv("HOME");
 
         traces.topCwdPath = getCwdPath();
-
-        assert(argc >= 2);
-        std::string progPath = argv[1];
-        std::string progRealPath = realPath(progPath.c_str());
 
         const int attachRetVal = attachAndPtraceTopChild(traces, topChild);
         if (attachRetVal < 0)
@@ -1184,7 +1197,7 @@ int main(int argc, char* argv[], char* envp[])
         const char* indentation = "    ";
 
         fprintf(fi, "program:\n");
-        fprintFilePathState(fi, indentation, progRealPath);
+        fprintFilePathState(fi, indentation, traces.topChildExecPath);
 
         fprintf(fi, "call:\n");
         for (int i = 1; i != argc; ++i) // all but first argument
