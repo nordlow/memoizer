@@ -1186,8 +1186,11 @@ int main(int argc, char* argv[], char* envp[])
 
         // TODO calculate chash from `pwd` `argv` and 'env' used in child
 
+        SHA256HexCString progHexCharBuf;
+        assert(SHA256_Digest_File(traces.topChildExecPath, progHexCharBuf) >= 0); // TODO memoize this call
+
         // post process
-        const Path call_file = (traces.homePath + "/.cache/memoized/calls/first.txt");
+        const Path call_file = (traces.homePath + "/.cache/memoized/calls/exec:" + progHexCharBuf + ".txt");
         FILE* fi = fopen(call_file.c_str(), "wb");
 
         const char* indentation = "    ";
