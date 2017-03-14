@@ -924,7 +924,6 @@ int ptraceTopChild(pid_t topChild, Traces& traces)
     }
 }
 
-
 int tryAttachToPid(pid_t child)
 {
     const uint tryCountMax = 1000;
