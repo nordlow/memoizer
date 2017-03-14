@@ -296,10 +296,17 @@ std::string readCxxString(pid_t child, unsigned long addr)
     return path;
 }
 
+struct timespec statModTimespec(const char* path)
+{
+    struct stat st;
+    assert(stat(path, &st) == 0);
+    return st.st_mtim; // modification time
+}
+
 /** Allocate and return a copy of a null-terminated C string at `addr`.
     TODO templatize T on struct stat when moving to D
  */
-struct stat readStat(pid_t child, unsigned long addr)
+struct stat ptraceReadStat(pid_t child, unsigned long addr)
 {
     struct stat data;
     uint8_t* statPtr = reinterpret_cast<uint8_t*>(&data); // TODO byte
@@ -617,8 +624,8 @@ void handleSyscall(pid_t child, Traces& traces)
                 case SYS_stat:
                 case SYS_lstat: // TODO specialcase on lstat
                 {
-                    const struct stat stat = readStat(child, pidSyscallArg(child, 1));
-                    struct timespec mtime = stat.st_mtim; // modification time
+                    const struct stat stat = ptraceReadStat(child, pidSyscallArg(child, 1));
+                    struct timespec mtim = stat.st_mtim; // modification time
 
                     if (isAbsolutePath(path))
                     {
@@ -644,19 +651,19 @@ void handleSyscall(pid_t child, Traces& traces)
                     auto hit = traces.trace1ByPid[child].maxTimespecByStatPath.find(path);
                     if (hit != traces.trace1ByPid[child].maxTimespecByStatPath.end()) // if hit
                     {
-                        if (traces.trace1ByPid[child].maxTimespecByStatPath[Path(path)] < mtime) // if more recent
+                        if (traces.trace1ByPid[child].maxTimespecByStatPath[Path(path)] < mtim) // if more recent
                         {
-                            traces.trace1ByPid[child].maxTimespecByStatPath[Path(path)] = mtime; // store more recent
+                            traces.trace1ByPid[child].maxTimespecByStatPath[Path(path)] = mtim; // store more recent
                         }
                     }
                     else
                     {
-                        traces.trace1ByPid[child].maxTimespecByStatPath[Path(path)] = mtime;
+                        traces.trace1ByPid[child].maxTimespecByStatPath[Path(path)] = mtim;
                     }
 
                     if (show)
                     {
-                        fprintf(stderr, " st_mtime:%ld.%09ld", mtime.tv_sec, mtime.tv_nsec);
+                        fprintf(stderr, " st_mtime:%ld.%09ld", mtim.tv_sec, mtim.tv_nsec);
                     }
 
                     break;
@@ -968,8 +975,8 @@ void SHA256_hashString(const unsigned char hash[SHA256_DIGEST_LENGTH],
 /** SHA-256 digest file with path `path` into `hexCharBuf`.
    See also: http://stackoverflow.com/questions/7853156/calculate-sha256-of-a-file-using-openssl-libcrypto-in-c
    */
-int SHA256_Digest_File(const char* path,
-                       SHA256HexCString hexCharBuf)
+int SHA256_Digest_File_C(const char* path,
+                         SHA256HexCString hexCharBuf)
 {
     FILE* file = fopen(path, "rb");
     if (!file)
@@ -1006,6 +1013,12 @@ int SHA256_Digest_File(const char* path,
     return 0;
 }
 
+int SHA256_Digest_File(const Path& path,
+                       SHA256HexCString hexCharBuf)
+{
+    return SHA256_Digest_File_C(path.c_str(), hexCharBuf);
+}
+
 /** Compress `sourcePath` to artifact cache if it isn't already that.
 
     TODO handle abrupt termination by first writing to temporary and then moving it cache atomically
@@ -1013,7 +1026,7 @@ int SHA256_Digest_File(const char* path,
 bool assertCompressedToCache(const Traces& traces, const Path& sourcePath)
 {
     SHA256HexCString hexCharBuf;
-    assert(SHA256_Digest_File(sourcePath.c_str(), hexCharBuf) >= 0);
+    assert(SHA256_Digest_File(sourcePath, hexCharBuf) >= 0);
 
     const Path destPath = getArtifactPath(traces, hexCharBuf, "zlib_compressed_data");
 
@@ -1149,7 +1162,13 @@ int main(int argc, char* argv[], char* envp[])
         const char* indentation = "    ";
 
         fprintf(fi, "program:\n");
-        fprintf(fi, "    %s TODO st_mtime and sha256:\n", progRealPath.c_str());
+
+        SHA256HexCString progHexCharBuf;
+        assert(SHA256_Digest_File(progRealPath, progHexCharBuf) >= 0);
+
+        fprintf(fi, "    %s TODO st_mtime %s\n",
+                progRealPath.c_str(),
+                progHexCharBuf);
 
         fprintf(fi, "call:\n");
         for (int i = 1; i != argc; ++i) // all but first argument
