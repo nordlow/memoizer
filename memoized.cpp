@@ -953,8 +953,10 @@ int attachAndPtraceTopChild(Traces& traces, pid_t topChild)
     return 0;
 }
 
+typedef char SHA256HexString[2*SHA256_DIGEST_LENGTH + 1];
+
 void SHA256_hashString(const unsigned char hash[SHA256_DIGEST_LENGTH],
-                       char digestHexStringBuf[2*SHA256_DIGEST_LENGTH + 1])
+                       SHA256HexString digestHexStringBuf)
 {
     for (uint i = 0; i < SHA256_DIGEST_LENGTH; i++)
     {
@@ -1010,7 +1012,7 @@ int SHA256_Digest_File(const char* path,
  */
 bool assertCompressedToCache(const Traces& traces, const Path& sourcePath)
 {
-    char digestHexStringBuf[2*SHA256_DIGEST_LENGTH + 1];
+    SHA256HexString digestHexStringBuf;
     assert(SHA256_Digest_File(sourcePath.c_str(), digestHexStringBuf) >= 0);
 
     const Path destPath = getArtifactPath(traces, digestHexStringBuf, "zlib_compressed_data");
