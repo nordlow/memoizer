@@ -763,12 +763,6 @@ void handleSyscall(pid_t child, Traces& traces)
                         else
                         {
                             const Path absPath = buildAbsPath(traces, child, path);
-                            if (path == ".sconsign.tmp")
-                            {
-                                fprintf(stderr, "path:%s\n", path.c_str());
-                                fprintf(stderr, "absPath:%s\n", absPath.c_str());
-                                fprintf(stderr, "traces.topCwdPath:%s\n", traces.topCwdPath.c_str());
-                            }
                             if (startsWith(absPath, traces.topCwdPath.c_str())) // TODO this is incorrect
                             {
                                 const Path relPath = absPath.substr(traces.topCwdPath.size() + 1,
@@ -778,10 +772,6 @@ void handleSyscall(pid_t child, Traces& traces)
                             }
                             else
                             {
-                                if (path == ".sconsign.tmp")
-                                {
-                                    printSyscall(child, syscall_num, retval); fprintf(stderr, " childPid:%d readFlag:%d writeFlag:%d done\n", child, readFlag, writeFlag);
-                                }
                                 // fprintf(stderr, "write absPath:%s\n", absPath.c_str());
                                 traces.trace1ByPid[child].absWritePaths.insert(absPath);
                             }
