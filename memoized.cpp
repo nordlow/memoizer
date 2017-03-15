@@ -590,17 +590,20 @@ void handleSyscall(pid_t child, Traces& traces)
     long retval = getReg(child, eax);
     assert(errno == 0);
 
-    if (show)
-    {
-        printSyscall(child, syscall_num, retval); endl(stderr);
-    }
-
     if (retval == -38)          // on call entry
     {
+        if (show)
+        {
+            printSyscall(child, syscall_num, retval); fprintf(stderr, " entering...\n");
+        }
         // nothing useful to do here for now
     }
     else                        // on call return
     {
+        if (show)
+        {
+            printSyscall(child, syscall_num, retval); fprintf(stderr, " done\n");
+        }
         if (retval >= 0)        // on successful return
         {
             //  file io successful return
