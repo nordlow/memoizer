@@ -805,6 +805,15 @@ void handleSyscall(pid_t child, Traces& traces)
                     endl();
                 }
             }
+            else if (syscall_num == SYS_rename)
+            {
+                const Path oldPath = readCxxString(child, pidSyscallArg(child, 0)); // TODO prevent allocation
+                const Path newPath = readCxxString(child, pidSyscallArg(child, 1)); // TODO prevent allocation
+                fprintf(stderr,
+                        "oldPath:%s => newPath:%s\n",
+                        oldPath.c_str(),
+                        newPath.c_str());
+            }
             else if (syscall_num == SYS_execve ||
                      syscall_num == SYS_vfork ||
                      syscall_num == SYS_clone)
