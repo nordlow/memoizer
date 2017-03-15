@@ -378,7 +378,8 @@ void printSyscallArgs(pid_t child, int num)
                  strcmp(sname, "chown") == 0 ||
                  strcmp(sname, "lchown") == 0 ||
                  strcmp(sname, "chmod") == 0 ||
-                 strcmp(sname, "mknod") == 0)
+                 strcmp(sname, "mknod") == 0 ||
+                 strcmp(sname, "remove") == 0)
         {
             if (i == 0)
             {
@@ -1043,6 +1044,7 @@ int SHA256_Digest_File(const Path& path,
 bool assertCompressedToCache(const Traces& traces, const Path& sourcePath)
 {
     SHA256HexCString hexCharBuf;
+    fprintf(stderr, "path:%s\n", sourcePath.c_str());
     assert(SHA256_Digest_File(sourcePath, hexCharBuf) >= 0);
 
     const Path destPath = getArtifactPath(traces, hexCharBuf, "zlib_compressed_data");
