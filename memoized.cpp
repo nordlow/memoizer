@@ -168,6 +168,9 @@ struct Trace1
     /// Stated absolute file paths.
     PathUSet absStatPaths;
 
+    /// Read-only opened (executable) file (shared library) paths.
+    PathUSet execPaths;
+
     /// Relative:
     /// Read-only opened relative file paths.
     PathUSet relReadPaths;
@@ -724,25 +727,32 @@ void handleSyscall(pid_t child, Traces& traces)
 
                     if (readFlag)
                     {
-                        // TODO functionize:
-                        if (isAbsolutePath(path))
+                        if (execFlag)
                         {
-                            traces.trace1ByPid[child].absReadPaths.insert(path);
+                            traces.trace1ByPid[child].execPaths.insert(path);
                         }
                         else
                         {
-                            const Path absPath = buildAbsPath(traces, child, path);
-                            if (startsWith(absPath, traces.topCwdPath.c_str()))
+                            // TODO functionize:
+                            if (isAbsolutePath(path))
                             {
-                                const Path relPath = absPath.substr(traces.topCwdPath.size() + 1,
-                                                                    absPath.size());
-                                // fprintf(stderr, "read relPath:%s\n", relPath.c_str());
-                                traces.trace1ByPid[child].relReadPaths.insert(relPath);
+                                traces.trace1ByPid[child].absReadPaths.insert(path);
                             }
                             else
                             {
-                                // fprintf(stderr, "read absPath:%s\n", absPath.c_str());
-                                traces.trace1ByPid[child].absReadPaths.insert(absPath);
+                                const Path absPath = buildAbsPath(traces, child, path);
+                                if (startsWith(absPath, traces.topCwdPath.c_str()))
+                                {
+                                    const Path relPath = absPath.substr(traces.topCwdPath.size() + 1,
+                                                                        absPath.size());
+                                    // fprintf(stderr, "read relPath:%s\n", relPath.c_str());
+                                    traces.trace1ByPid[child].relReadPaths.insert(relPath);
+                                }
+                                else
+                                {
+                                    // fprintf(stderr, "read absPath:%s\n", absPath.c_str());
+                                    traces.trace1ByPid[child].absReadPaths.insert(absPath);
+                                }
                             }
                         }
                     }
@@ -1257,20 +1267,6 @@ int main(int argc, char* argv[], char* envp[])
 
         const char* indentation = "    ";
 
-        fprintf(tempStateFile, "executable:\n");
-        fprintFilePathState(tempStateFile, indentation, traces.topChildExecPath);
-
-        fprintf(tempStateFile, "libraries:\n");
-        fprintf(tempStateFile, "TODO: add libraries\n");
-
-        fprintf(tempStateFile, "call:\n");
-        for (int i = 1; i != argc; ++i) // all but first argument
-        {
-            fprintf(tempStateFile, "%s%s\n", indentation, argv[i]);
-        }
-
-        fprintf(tempStateFile, "cwd: %s\n", traces.topCwdPath.c_str());
-
         bool first = false;
 
         // collect all paths
@@ -1280,6 +1276,7 @@ int main(int argc, char* argv[], char* envp[])
         PathOSet allRelWritePaths;
         PathOSet allRelReadPaths;
         PathOSet allRelStatPaths;
+        PathOSet allExecPaths;
         for (auto const& ent : traces.trace1ByPid)
         {
             const Trace1& trace1 = ent.second;
@@ -1307,7 +1304,32 @@ int main(int argc, char* argv[], char* envp[])
             {
                 allRelStatPaths.insert(path);
             }
+            for (auto const& path : trace1.execPaths)
+            {
+                allExecPaths.insert(path);
+            }
         }
+
+        fprintf(tempStateFile, "executable:\n");
+        fprintFilePathState(tempStateFile, indentation, traces.topChildExecPath);
+
+        first = true;
+        for (const Path& path : allExecPaths)
+        {
+            if (isHashableFilePath(path))
+            {
+                if (first) { fprintf(tempStateFile, "executable reads (libraries):\n"); first = false; }
+                fprintFilePathState(tempStateFile, indentation, path);
+            }
+        }
+
+        fprintf(tempStateFile, "call:\n");
+        for (int i = 1; i != argc; ++i) // all but first argument
+        {
+            fprintf(tempStateFile, "%s%s\n", indentation, argv[i]);
+        }
+
+        fprintf(tempStateFile, "cwd: %s\n", traces.topCwdPath.c_str());
 
         first = true;
         for (const Path& path : allRelWritePaths)
