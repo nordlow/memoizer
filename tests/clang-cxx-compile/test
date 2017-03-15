@@ -1,0 +1,4 @@
+#!/bin/bash
+
+make -C ../.. memoized &&
+../../memoized clang++ main.cpp
