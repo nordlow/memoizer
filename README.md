@@ -25,9 +25,9 @@ Enables
 Features
 =========
 
-- Tracks reads (inputs)
-- Trackes writes and their potential renames (output)
-- Tracks stats and access
+- Tracks calls to `read()`
+- Trackes calls to `write()` and its potential moves via `rename()`.
+- Tracks calls to `stat()` and `access()`.
 - Intercepts calls to stat() to peek at its modification time (`st_mtime`)
 
 Planned Features
