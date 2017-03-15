@@ -670,6 +670,7 @@ void handleSyscall(pid_t child, Traces& traces)
                         }
                     }
 
+                    // TODO functionize:
                     auto hit = traces.trace1ByPid[child].maxTimespecByStatPath.find(path);
                     if (hit != traces.trace1ByPid[child].maxTimespecByStatPath.end()) // if hit
                     {
