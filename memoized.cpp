@@ -661,12 +661,10 @@ void handleSyscall(pid_t child, Traces& traces)
                         {
                             const Path relPath = absPath.substr(traces.topCwdPath.size() + 1,
                                                                 absPath.size());
-                            // fprintf(stderr, "stat relPath:%s\n", relPath.c_str());
                             traces.trace1ByPid[child].relStatPaths.insert(relPath);
                         }
                         else
                         {
-                            // fprintf(stderr, "stat absPath:%s\n", absPath.c_str());
                             traces.trace1ByPid[child].absStatPaths.insert(absPath);
                         }
                     }
@@ -741,12 +739,10 @@ void handleSyscall(pid_t child, Traces& traces)
                                 {
                                     const Path relPath = absPath.substr(traces.topCwdPath.size() + 1,
                                                                         absPath.size());
-                                    // fprintf(stderr, "read relPath:%s\n", relPath.c_str());
                                     traces.trace1ByPid[child].relReadPaths.insert(relPath);
                                 }
                                 else
                                 {
-                                    // fprintf(stderr, "read absPath:%s\n", absPath.c_str());
                                     traces.trace1ByPid[child].absReadPaths.insert(absPath);
                                 }
                             }
