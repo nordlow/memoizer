@@ -763,12 +763,10 @@ void handleSyscall(pid_t child, Traces& traces)
                             {
                                 const Path relPath = absPath.substr(traces.topCwdPath.size() + 1,
                                                                     absPath.size());
-                                // fprintf(stderr, "write relPath:%s\n", relPath.c_str());
                                 traces.trace1ByPid[child].relWritePaths.insert(relPath);
                             }
                             else
                             {
-                                // fprintf(stderr, "write absPath:%s\n", absPath.c_str());
                                 traces.trace1ByPid[child].absWritePaths.insert(absPath);
                             }
                         }
