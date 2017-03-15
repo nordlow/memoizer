@@ -1,5 +1,4 @@
 #!/bin/bash
 
 make -C ../.. memoized &&
-g++ main.cpp &&
-./memoized scons --no-cache -C ~/Work/knet
+../../memoized scons --no-cache -C ~/Work/knet
