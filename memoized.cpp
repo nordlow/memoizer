@@ -1422,7 +1422,7 @@ int main(int argc, char* argv[], char* envp[])
                     }
                     else
                     {
-                        fprintf(stderr, "memoized: warning: TODO stat() file %s again\n", path.c_str());
+                        fprintf(stderr, "memoized: warning: TODO stat(\"%s\")\n", path.c_str());
                     }
 
                     endl(tempStateFile);
