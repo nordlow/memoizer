@@ -763,7 +763,7 @@ void handleSyscall(pid_t child, Traces& traces)
                         else
                         {
                             const Path absPath = buildAbsPath(traces, child, path);
-                            if (startsWith(absPath, traces.topCwdPath.c_str())) // TODO this is incorrect
+                            if (startsWith(absPath, traces.topCwdPath.c_str()))
                             {
                                 const Path relPath = absPath.substr(traces.topCwdPath.size() + 1,
                                                                     absPath.size());
