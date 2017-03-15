@@ -31,7 +31,7 @@ http://blog.nelhage.com/2010/08/write-yourself-an-strace-in-70-lines-of-code/
 
 ## Default
 
-Assert that inputs are not changed during execution
+Assert that inputs are not changed during execution.
 
 ## Optional
 
