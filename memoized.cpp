@@ -672,14 +672,14 @@ void handleSyscall(pid_t child, Traces& traces)
                     auto hit = traces.trace1ByPid[child].maxTimespecByStatPath.find(path);
                     if (hit != traces.trace1ByPid[child].maxTimespecByStatPath.end()) // if hit
                     {
-                        if (traces.trace1ByPid[child].maxTimespecByStatPath[Path(path)] < mtim) // if more recent
+                        if (traces.trace1ByPid[child].maxTimespecByStatPath[path] < mtim) // if more recent
                         {
-                            traces.trace1ByPid[child].maxTimespecByStatPath[Path(path)] = mtim; // store more recent
+                            traces.trace1ByPid[child].maxTimespecByStatPath[path] = mtim; // store more recent
                         }
                     }
                     else
                     {
-                        traces.trace1ByPid[child].maxTimespecByStatPath[Path(path)] = mtim;
+                        traces.trace1ByPid[child].maxTimespecByStatPath[path] = mtim;
                     }
 
                     if (show)
@@ -1409,7 +1409,8 @@ int main(int argc, char* argv[], char* envp[])
                 {
                     if (first) { fprintf(tempStateFile, "absolute stats:\n"); first = false; }
                     fprintf(tempStateFile, "%s%s", indentation, path.c_str());
-                    auto hit = trace1.maxTimespecByStatPath.find(Path(path));
+
+                    auto hit = trace1.maxTimespecByStatPath.find(path);
                     if (hit != trace1.maxTimespecByStatPath.end()) // if hit
                     {
                         fprintf(tempStateFile,
@@ -1417,6 +1418,11 @@ int main(int argc, char* argv[], char* envp[])
                                 hit->second.tv_sec,
                                 hit->second.tv_nsec);
                     }
+                    else
+                    {
+                        fprintf(stderr, "memoized: warning: TODO stat() file %s again\n", path.c_str());
+                    }
+
                     endl(tempStateFile);
                 }
             }
