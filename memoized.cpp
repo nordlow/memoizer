@@ -589,9 +589,14 @@ void handleSyscall(pid_t child, Traces& traces)
     // return value
     long retval = getReg(child, eax);
     assert(errno == 0);
+
+    if (show)
+    {
+        printSyscall(child, syscall_num, retval); endl(stderr);
+    }
+
     if (retval == -38)          // on call entry
     {
-        // printSyscall(child, syscall_num, retval); endl(stderr);
         // nothing useful to do here for now
     }
     else                        // on call return
