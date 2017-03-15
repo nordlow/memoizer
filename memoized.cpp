@@ -697,14 +697,14 @@ void handleSyscall(pid_t child, Traces& traces)
                     const auto mode = pidSyscallArg(child, 2);
 
                     // true if this open only reads from file
-                    const bool read_flag = (((flags & (O_RDONLY)) ||
+                    const bool readFlag = (((flags & (O_RDONLY)) ||
                                              (flags & (O_CLOEXEC)) ||
                                              (flags & (O_NOCTTY)) ||
                                              (flags == 0)) &&
                                             (!(flags & O_TRUNC)));
 
                     // true if this open only writes to file
-                    const bool write_flag = ((flags & (O_WRONLY)) ||
+                    const bool writeFlag = ((flags & (O_WRONLY)) ||
                                              (flags & (O_RDWR |
                                                        O_CREAT |
                                                        O_TRUNC)) ||
@@ -713,9 +713,14 @@ void handleSyscall(pid_t child, Traces& traces)
                                                        O_TRUNC)));
 
                     // assure that we decoded correctly
-                    assert(read_flag || write_flag);
+                    assert(readFlag || writeFlag);
 
-                    if (read_flag)
+                    if (path == ".sconsign.tmp")
+                    {
+                        printSyscall(child, syscall_num, retval); fprintf(stderr, " childPid:%d readFlag:%d writeFlag:%d done\n", child, readFlag, writeFlag);
+                    }
+
+                    if (readFlag)
                     {
                         // TODO functionize:
                         if (isAbsolutePath(path))
@@ -740,7 +745,7 @@ void handleSyscall(pid_t child, Traces& traces)
                         }
                     }
 
-                    if (write_flag)
+                    if (writeFlag)
                     {
                         // TODO functionize:
                         if (isAbsolutePath(path))
@@ -789,8 +794,8 @@ void handleSyscall(pid_t child, Traces& traces)
                             if (flags & O_NOCTTY) { fprintf(stderr, " O_NOCTTY"); }
                             if (flags & O_NOFOLLOW) { fprintf(stderr, " O_NOFOLLOW"); }
 
-                            if (read_flag) { fprintf(stderr, " READ"); }
-                            if (write_flag) { fprintf(stderr, " WRITE"); }
+                            if (readFlag) { fprintf(stderr, " READ"); }
+                            if (writeFlag) { fprintf(stderr, " WRITE"); }
                         }
                     }
 
@@ -823,9 +828,10 @@ void handleSyscall(pid_t child, Traces& traces)
                     else
                     {
                         fprintf(stderr,
-                                "memoized: warning: TODO handle rename(oldPath:%s, newPath:%s)\n",
+                                "memoized: warning: TODO handle rename(oldPath:%s, newPath:%s) from childPid:%d\n",
                                 oldPath.c_str(),
-                                newPath.c_str());
+                                newPath.c_str(),
+                                child);
                     }
                 }
 
