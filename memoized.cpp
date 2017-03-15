@@ -1258,6 +1258,8 @@ int main(int argc, char* argv[], char* envp[])
         fprintf(tempStateFile, "executable:\n");
         fprintFilePathState(tempStateFile, indentation, traces.topChildExecPath);
 
+        fprintf(tempStateFile, "libraries:\n");
+
         fprintf(tempStateFile, "call:\n");
         for (int i = 1; i != argc; ++i) // all but first argument
         {
