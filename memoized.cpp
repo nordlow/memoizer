@@ -703,6 +703,8 @@ void handleSyscall(pid_t child, Traces& traces)
                                              (flags == 0)) &&
                                             (!(flags & O_TRUNC)));
 
+                    const bool execFlag = flags & O_CLOEXEC;
+
                     // true if this open only writes to file
                     const bool writeFlag = ((flags & (O_WRONLY)) ||
                                              (flags & (O_RDWR |
@@ -1259,6 +1261,7 @@ int main(int argc, char* argv[], char* envp[])
         fprintFilePathState(tempStateFile, indentation, traces.topChildExecPath);
 
         fprintf(tempStateFile, "libraries:\n");
+        fprintf(tempStateFile, "TODO: add libraries\n");
 
         fprintf(tempStateFile, "call:\n");
         for (int i = 1; i != argc; ++i) // all but first argument
