@@ -1,4 +1,4 @@
 #!/bin/bash
 
 make -C ../.. memoized &&
-../../memoized /home/per/.local/scons-snapshot/bin/scons --no-cache -C ~/Work/knet
+../../memoized ~/.local/scons-snapshot/bin/scons --no-cache -C ~/Work/knet
