@@ -650,6 +650,7 @@ void handleSyscall(pid_t child, Traces& traces)
                     const struct stat stat = ptraceReadStat(child, pidSyscallArg(child, 1));
                     struct timespec mtim = stat.st_mtim; // modification time
 
+                    // TODO functionize:
                     if (isAbsolutePath(path))
                     {
                         traces.trace1ByPid[child].absStatPaths.insert(path);
