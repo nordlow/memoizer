@@ -715,16 +715,11 @@ void handleSyscall(pid_t child, Traces& traces)
                                                        O_CREAT |
                                                        O_TRUNC)));
 
-                    // true if this open a file containing executable code
+                    // true if this open a file containing executable cod
                     const bool execFlag = flags & O_CLOEXEC;
 
                     // assure that we decoded correctly
                     assert(readFlag || writeFlag);
-
-                    if (path == ".sconsign.tmp")
-                    {
-                        printSyscall(child, syscall_num, retval); fprintf(stderr, " childPid:%d readFlag:%d writeFlag:%d done\n", child, readFlag, writeFlag);
-                    }
 
                     if (readFlag)
                     {
@@ -768,7 +763,13 @@ void handleSyscall(pid_t child, Traces& traces)
                         else
                         {
                             const Path absPath = buildAbsPath(traces, child, path);
-                            if (startsWith(absPath, traces.topCwdPath.c_str()))
+                            if (path == ".sconsign.tmp")
+                            {
+                                fprintf(stderr, "path:%s\n", path.c_str());
+                                fprintf(stderr, "absPath:%s\n", absPath.c_str());
+                                fprintf(stderr, "traces.topCwdPath:%s\n", traces.topCwdPath.c_str());
+                            }
+                            if (startsWith(absPath, traces.topCwdPath.c_str())) // TODO this is incorrect
                             {
                                 const Path relPath = absPath.substr(traces.topCwdPath.size() + 1,
                                                                     absPath.size());
@@ -777,6 +778,10 @@ void handleSyscall(pid_t child, Traces& traces)
                             }
                             else
                             {
+                                if (path == ".sconsign.tmp")
+                                {
+                                    printSyscall(child, syscall_num, retval); fprintf(stderr, " childPid:%d readFlag:%d writeFlag:%d done\n", child, readFlag, writeFlag);
+                                }
                                 // fprintf(stderr, "write absPath:%s\n", absPath.c_str());
                                 traces.trace1ByPid[child].absWritePaths.insert(absPath);
                             }
@@ -828,18 +833,29 @@ void handleSyscall(pid_t child, Traces& traces)
                 const Path oldPath = readCxxString(child, pidSyscallArg(child, 0)); // TODO prevent allocation
                 const Path newPath = readCxxString(child, pidSyscallArg(child, 1)); // TODO prevent allocation
 
-                auto relWriteOldHit = traces.trace1ByPid[child].relWritePaths.find(oldPath);
+                const Path oldAbsPath = buildAbsPath(traces, child, oldPath);
+                const Path newAbsPath = buildAbsPath(traces, child, newPath);
+
+                auto relWriteOldHit = traces.trace1ByPid[child].relWritePaths.find(oldAbsPath);
                 if (relWriteOldHit != traces.trace1ByPid[child].relWritePaths.end()) // if relative hit
                 {
+                    traces.trace1ByPid[child].relWritePaths.erase(relWriteOldHit);
+                    traces.trace1ByPid[child].relWritePaths.insert(newAbsPath);
                 }
                 else
                 {
-                    auto absWriteOldHit = traces.trace1ByPid[child].absWritePaths.find(oldPath);
+                    auto absWriteOldHit = traces.trace1ByPid[child].absWritePaths.find(oldAbsPath);
                     if (absWriteOldHit != traces.trace1ByPid[child].absWritePaths.end()) // if absolute hit
                     {
+                        traces.trace1ByPid[child].absWritePaths.erase(absWriteOldHit);
+                        traces.trace1ByPid[child].absWritePaths.insert(newAbsPath);
                     }
                     else
                     {
+                        for (auto const& writePath: traces.trace1ByPid[child].absWritePaths)
+                        {
+                            fprintf(stderr, "writePath:%s\n", writePath.c_str());
+                        }
                         fprintf(stderr,
                                 "memoized: warning: TODO handle rename(oldPath:%s, newPath:%s) from childPid:%d\n",
                                 oldPath.c_str(),
