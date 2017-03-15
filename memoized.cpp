@@ -365,6 +365,7 @@ void printSyscallArgs(pid_t child, int num)
         }
         else if (strcmp(sname, "open") == 0 || // TODO use std.algorithm.among() when porting to Dlang
                  strcmp(sname, "utime") == 0 ||
+                 strcmp(sname, "utimes") == 0 ||
                  strcmp(sname, "access") == 0 ||
                  strcmp(sname, "mount") == 0 ||
                  strcmp(sname, "link") == 0 ||
