@@ -35,8 +35,8 @@ Assert that inputs are not changed during execution.
 
 ## Optional
 
-Assert project-relative reads from only persistent inputs, that is non-modified
-files with Git status up-to-date:
+Assert that inputs are only project-relative reads from persistent inputs, that
+is non-modified files (with Git status up-to-date):
 
 - `--assert-persistent-relative-reads`
 
