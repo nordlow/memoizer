@@ -25,10 +25,12 @@ Enables
 Features
 =========
 
-- Tracks calls to `read()`
-- Trackes calls to `write()` and its potential moves via `rename()`.
-- Tracks calls to `stat()` and `access()`.
-- Intercepts calls to stat() to peek at its modification time (`st_mtime`)
+It
+
+- tracks calls to `read()`,
+- trackes calls to `write()` and its potential moves via `rename()`,
+- tracks calls to `stat()` and `access()`,
+- intercepts calls to stat() to peek at its modification time (`st_mtime`),
 
 Planned Features
 ================
