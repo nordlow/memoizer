@@ -602,6 +602,32 @@ void updateMaxTime(TimespecByPath& timespecByPath,
     }
 }
 
+void updateRelAbsPaths(Traces& traces,
+                       pid_t child,
+                       PathUSet& relPaths,
+                       PathUSet& absPaths,
+                       const Path& path)
+{
+    if (isAbsolutePath(path))
+    {
+        absPaths.insert(path);
+    }
+    else
+    {
+        const Path absPath = buildAbsPath(traces, child, path);
+        if (startsWith(absPath, traces.topCwdPath.c_str()))
+        {
+            const Path relPath = absPath.substr(traces.topCwdPath.size() + 1,
+                                                absPath.size());
+            relPaths.insert(relPath);
+        }
+        else
+        {
+            absPaths.insert(absPath);
+        }
+    }
+}
+
 void handleSyscall(pid_t child, Traces& traces)
 {
     const long syscall_num = getReg(child, orig_eax);
@@ -736,49 +762,21 @@ void handleSyscall(pid_t child, Traces& traces)
                         }
                         else
                         {
-                            // TODO functionize:
-                            if (isAbsolutePath(path))
-                            {
-                                traces.trace1ByPid[child].absReadPaths.insert(path);
-                            }
-                            else
-                            {
-                                const Path absPath = buildAbsPath(traces, child, path);
-                                if (startsWith(absPath, traces.topCwdPath.c_str()))
-                                {
-                                    const Path relPath = absPath.substr(traces.topCwdPath.size() + 1,
-                                                                        absPath.size());
-                                    traces.trace1ByPid[child].relReadPaths.insert(relPath);
-                                }
-                                else
-                                {
-                                    traces.trace1ByPid[child].absReadPaths.insert(absPath);
-                                }
-                            }
+                            updateRelAbsPaths(traces,
+                                              child,
+                                              traces.trace1ByPid[child].relReadPaths,
+                                              traces.trace1ByPid[child].absReadPaths,
+                                              path);
                         }
                     }
 
                     if (writeFlag)
                     {
-                        // TODO functionize:
-                        if (isAbsolutePath(path))
-                        {
-                            traces.trace1ByPid[child].absWritePaths.insert(path);
-                        }
-                        else
-                        {
-                            const Path absPath = buildAbsPath(traces, child, path);
-                            if (startsWith(absPath, traces.topCwdPath.c_str()))
-                            {
-                                const Path relPath = absPath.substr(traces.topCwdPath.size() + 1,
-                                                                    absPath.size());
-                                traces.trace1ByPid[child].relWritePaths.insert(relPath);
-                            }
-                            else
-                            {
-                                traces.trace1ByPid[child].absWritePaths.insert(absPath);
-                            }
-                        }
+                        updateRelAbsPaths(traces,
+                                          child,
+                                          traces.trace1ByPid[child].relWritePaths,
+                                          traces.trace1ByPid[child].absWritePaths,
+                                          path);
                     }
 
                     if (show)
