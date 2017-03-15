@@ -1338,6 +1338,7 @@ int main(int argc, char* argv[], char* envp[])
 
         fprintf(tempStateFile, "cwd: %s\n", traces.topCwdPath.c_str());
 
+        // relative writes
         first = true;
         for (const Path& path : allRelWritePaths)
         {
@@ -1349,6 +1350,7 @@ int main(int argc, char* argv[], char* envp[])
             }
         }
 
+        // relative reads
         first = true;
         for (const Path& path : allRelReadPaths)
         {
@@ -1359,6 +1361,7 @@ int main(int argc, char* argv[], char* envp[])
             }
         }
 
+        // relative stats
         first = true;
         for (auto const& ent : traces.trace1ByPid)
         {
@@ -1386,6 +1389,7 @@ int main(int argc, char* argv[], char* envp[])
             }
         }
 
+        // absolute writes
         first = true;
         for (const Path& path : allAbsWritePaths)
         {
@@ -1397,6 +1401,7 @@ int main(int argc, char* argv[], char* envp[])
             }
         }
 
+        // absolute reads
         first = true;
         for (const Path& path : allAbsReadPaths)
         {
@@ -1407,6 +1412,7 @@ int main(int argc, char* argv[], char* envp[])
             }
         }
 
+        // absolute stats
         first = true;
         for (auto const& ent : traces.trace1ByPid)
         {
