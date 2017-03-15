@@ -30,7 +30,7 @@ It
 - tracks calls to `read()`,
 - trackes calls to `write()` and its potential moves via `rename()`,
 - tracks calls to `stat()` and `access()`,
-- intercepts calls to stat() to peek at its modification time (`st_mtime`),
+- intercepts calls to `stat()` to peek at its modification time (`st_mtime`),
 
 Planned Features
 ================
