@@ -16,16 +16,14 @@ Usage
 Enables
 =======
 
-- caching
-- detection of process flow: consumer inputs of producer of outputs
-- safe parallelization
-- immutable persistent storage of inputs and outputs
-- detect cyclic dependencies (inputs same as outputs)
+- caching,
+- detection of process flow: consumer inputs of producer of outputs,
+- safe parallelization,
+- immutable persistent storage of inputs and outputs,
+- detect cyclic dependencies (inputs same as outputs),
 
 Features
-=========
-
-It
+========
 
 - tracks calls to `read()`,
 - trackes calls to `write()` and its potential moves via `rename()`,
