@@ -1356,7 +1356,6 @@ int main(int argc, char* argv[], char* envp[])
         first = true;
         for (auto const& ent : traces.trace1ByPid)
         {
-            // const pid_t child = ent.first;
             const Trace1& trace1 = ent.second;
             for (const Path& path : toSortedVector(trace1.relStatPaths))
             {
@@ -1371,6 +1370,10 @@ int main(int argc, char* argv[], char* envp[])
                                 " %ld.%09ld",
                                 hit->second.tv_sec,
                                 hit->second.tv_nsec);
+                    }
+                    else
+                    {
+                        fprintf(stderr, "memoized: warning: TODO stat() file %s again\n", path.c_str());
                     }
                     endl(tempStateFile);
                 }
@@ -1401,7 +1404,6 @@ int main(int argc, char* argv[], char* envp[])
         first = true;
         for (auto const& ent : traces.trace1ByPid)
         {
-            // const pid_t child = ent.first;
             const Trace1& trace1 = ent.second;
             for (const Path& path : toSortedVector(trace1.absStatPaths))
             {
