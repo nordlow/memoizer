@@ -805,14 +805,37 @@ void handleSyscall(pid_t child, Traces& traces)
                     endl();
                 }
             }
-            else if (syscall_num == SYS_rename)
+            else if (syscall_num == SYS_rename) // follow renames
             {
                 const Path oldPath = readCxxString(child, pidSyscallArg(child, 0)); // TODO prevent allocation
                 const Path newPath = readCxxString(child, pidSyscallArg(child, 1)); // TODO prevent allocation
-                fprintf(stderr,
-                        "oldPath:%s => newPath:%s\n",
-                        oldPath.c_str(),
-                        newPath.c_str());
+
+                auto relWriteOldHit = traces.trace1ByPid[child].relWritePaths.find(oldPath);
+                if (relWriteOldHit != traces.trace1ByPid[child].relWritePaths.end()) // if relative hit
+                {
+                }
+                else
+                {
+                    auto absWriteOldHit = traces.trace1ByPid[child].absWritePaths.find(oldPath);
+                    if (absWriteOldHit != traces.trace1ByPid[child].absWritePaths.end()) // if absolute hit
+                    {
+                    }
+                    else
+                    {
+                        fprintf(stderr,
+                                "memoized: warning: TODO handle rename(oldPath:%s, newPath:%s)\n",
+                                oldPath.c_str(),
+                                newPath.c_str());
+                    }
+                }
+
+                if (show)
+                {
+                    fprintf(stderr,
+                            "rename(oldPath:%s, newPath:%s)\n",
+                            oldPath.c_str(),
+                            newPath.c_str());
+                }
             }
             else if (syscall_num == SYS_execve ||
                      syscall_num == SYS_vfork ||
@@ -1061,8 +1084,9 @@ int SHA256_Digest_File(const Path& path,
  */
 bool assertCompressedToCache(const Traces& traces, const Path& sourcePath)
 {
+    // fprintf(stderr, "path:%s\n", sourcePath.c_str());
+
     SHA256HexCString hexCharBuf;
-    fprintf(stderr, "path:%s\n", sourcePath.c_str());
     assert(SHA256_Digest_File(sourcePath, hexCharBuf) >= 0);
 
     const Path destPath = getArtifactPath(traces, hexCharBuf, "zlib_compressed_data");
