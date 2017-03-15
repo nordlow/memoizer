@@ -584,6 +584,24 @@ Path buildAbsPath(Traces& traces, pid_t child, const Path& path)
     }
 }
 
+void updateMaxTime(TimespecByPath& timespecByPath,
+                   const Path& path,
+                   const struct timespec& mtim)
+{
+    auto hit = timespecByPath.find(path);
+    if (hit != timespecByPath.end()) // if hit
+    {
+        if (timespecByPath[path] < mtim) // if more recent
+        {
+            timespecByPath[path] = mtim; // store more recent
+        }
+    }
+    else
+    {
+        timespecByPath[path] = mtim;
+    }
+}
+
 void handleSyscall(pid_t child, Traces& traces)
 {
     const long syscall_num = getReg(child, orig_eax);
@@ -654,6 +672,7 @@ void handleSyscall(pid_t child, Traces& traces)
                     if (isAbsolutePath(path))
                     {
                         traces.trace1ByPid[child].absStatPaths.insert(path);
+                        updateMaxTime(traces.trace1ByPid[child].maxTimespecByStatPath, path, mtim);
                     }
                     else
                     {
@@ -663,25 +682,13 @@ void handleSyscall(pid_t child, Traces& traces)
                             const Path relPath = absPath.substr(traces.topCwdPath.size() + 1,
                                                                 absPath.size());
                             traces.trace1ByPid[child].relStatPaths.insert(relPath);
+                            updateMaxTime(traces.trace1ByPid[child].maxTimespecByStatPath, relPath, mtim);
                         }
                         else
                         {
                             traces.trace1ByPid[child].absStatPaths.insert(absPath);
+                            updateMaxTime(traces.trace1ByPid[child].maxTimespecByStatPath, absPath, mtim);
                         }
-                    }
-
-                    // TODO functionize:
-                    auto hit = traces.trace1ByPid[child].maxTimespecByStatPath.find(path);
-                    if (hit != traces.trace1ByPid[child].maxTimespecByStatPath.end()) // if hit
-                    {
-                        if (traces.trace1ByPid[child].maxTimespecByStatPath[path] < mtim) // if more recent
-                        {
-                            traces.trace1ByPid[child].maxTimespecByStatPath[path] = mtim; // store more recent
-                        }
-                    }
-                    else
-                    {
-                        traces.trace1ByPid[child].maxTimespecByStatPath[path] = mtim;
                     }
 
                     if (show)
