@@ -206,7 +206,8 @@ bool isHashableFilePath(const Path& path)
 {
     return (path != "/tmp" &&
             (!startsWith(path, "/tmp/")) &&
-            (!startsWith(path, "/dev/urandom")));
+            (!startsWith(path, "/dev/urandom")) &&
+            (!startsWith(path, "/dev/null")));
 }
 
 template<typename T>
