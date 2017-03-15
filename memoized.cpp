@@ -706,8 +706,6 @@ void handleSyscall(pid_t child, Traces& traces)
                                              (flags == 0)) &&
                                             (!(flags & O_TRUNC)));
 
-                    const bool execFlag = flags & O_CLOEXEC;
-
                     // true if this open only writes to file
                     const bool writeFlag = ((flags & (O_WRONLY)) ||
                                              (flags & (O_RDWR |
@@ -716,6 +714,9 @@ void handleSyscall(pid_t child, Traces& traces)
                                              (flags & (O_WRONLY |
                                                        O_CREAT |
                                                        O_TRUNC)));
+
+                    // true if this open a file containing executable code
+                    const bool execFlag = flags & O_CLOEXEC;
 
                     // assure that we decoded correctly
                     assert(readFlag || writeFlag);
