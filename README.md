@@ -22,6 +22,14 @@ Enables
 - immutable persistent storage of inputs and outputs
 - detect cyclic dependencies (inputs same as outputs)
 
+Features
+=========
+
+- Tracks reads (inputs)
+- Trackes writes and their potential renames (output)
+- Tracks stats and access
+- Intercepts calls to stat() to peek at its modification time (`st_mtime`)
+
 Planned Features
 ================
 
